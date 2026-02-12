@@ -3,116 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexDrop | Logistics & Market</title>
+    <title>NexDrop | Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --cyan: #22d3ee; --bg: #020617; --neon-glow: 0 0 15px rgba(34, 211, 238, 0.3); }
+        :root { --cyan: #22d3ee; --bg: #020617; }
         body { background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: var(--neon-glow); }
-        .page { display: none; opacity: 0; transform: translateY(20px); transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
-        .page.active { display: block; opacity: 1; transform: translateY(0); }
-        #chatWidget { position: fixed; bottom: 25px; right: 25px; z-index: 9999; transition: transform 0.3s ease; }
-        .chat-bubble { width: 320px; height: 450px; display: none; flex-direction: column; bottom: 85px; position: absolute; right: 0; }
-        .chat-bubble.open { display: flex; animation: slideUp 0.4s ease forwards; }
-        .btn-hover:hover { border-color: var(--cyan); box-shadow: var(--neon-glow); transform: translateY(-2px); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        #adminPortal { display: none; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Slide Animations */
+        .slide-in { animation: slideRight 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; opacity: 0; }
+        @keyframes slideRight { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Admin Dashboard Layout */
+        #adminPortal { display: none; background: #070a13; min-height: 100vh; }
         .admin-active #adminPortal { display: block !important; }
-        .admin-active #authGate, .admin-active #mainApp, .admin-active #chatWidget { display: none !important; }
+        .admin-active #authGate, .admin-active #mainApp { display: none !important; }
+        
+        .product-card:hover img { transform: scale(1.1); }
+        img { transition: transform 0.5s ease; }
     </style>
 </head>
-<body class="pb-10">
+<body>
 
     <div id="authGate" class="min-h-screen flex items-center justify-center px-6">
-        <div class="max-w-md w-full glass p-10 rounded-[2.5rem] border border-cyan-500/20 text-center">
-            <h1 class="text-4xl font-black text-cyan-400 mb-2 tracking-tighter">NEXDROP</h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-10">Identity Verification</p>
+        <div class="max-w-md w-full glass p-10 rounded-[2.5rem] border border-cyan-500/20 text-center slide-in">
+            <h1 class="text-4xl font-black text-cyan-400 mb-8 tracking-tighter">NEXDROP</h1>
             <div class="space-y-4">
-                <input type="text" id="regName" placeholder="Full Name" class="hidden w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-500 text-white">
-                <input type="email" id="authEmail" placeholder="Email" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-500 text-white">
-                <input type="password" id="authPass" placeholder="Access Password" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-500 text-white">
-                <button onclick="handleCustomerAuth()" class="w-full bg-cyan-500 text-black font-black py-4 rounded-2xl shadow-lg hover:bg-cyan-400 transition-all">ACCESS SYSTEM</button>
-                <button onclick="toggleAuthMode()" id="toggleBtn" class="text-[10px] text-gray-500 mt-4 uppercase font-bold hover:text-cyan-400">Create New Profile</button>
+                <input type="text" id="regName" placeholder="Full Name" class="hidden w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white">
+                <input type="email" id="authEmail" placeholder="Email Address" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white">
+                <input type="password" id="authPass" placeholder="Secure Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white">
+                <button onclick="handleAuth()" class="w-full bg-cyan-500 text-black font-black py-4 rounded-2xl">INITIALIZE</button>
+                <button onclick="toggleAuth()" id="toggleBtn" class="text-[10px] text-gray-500 mt-4 uppercase font-bold">New Account</button>
             </div>
         </div>
     </div>
 
     <div id="mainApp" class="hidden">
         <nav class="fixed top-0 w-full z-50 px-6 py-5">
-            <div class="max-w-6xl mx-auto glass rounded-[1.5rem] p-4 flex justify-between items-center">
-                <h1 class="text-xl font-black text-cyan-400 tracking-tighter cursor-pointer" onclick="showPage('home')">NEXDROP</h1>
+            <div class="max-w-6xl mx-auto glass rounded-2xl p-4 flex justify-between items-center">
+                <h1 class="text-xl font-black text-cyan-400 cursor-pointer" onclick="showPage('home')">NEXDROP</h1>
                 <div class="flex gap-6 text-[10px] font-bold uppercase tracking-widest items-center">
                     <button onclick="showPage('market')">Market</button>
-                    <button onclick="showPage('cart')" class="text-cyan-400">Cart (<span id="cartCount">0</span>)</button>
-                    <button onclick="showPage('profile')" id="navName" class="bg-cyan-500/10 px-4 py-2 rounded-xl">User</button>
+                    <button onclick="showPage('profile')" id="navName" class="text-cyan-400">User</button>
                 </div>
             </div>
         </nav>
 
-        <div id="chatWidget">
-            <div id="chatBubble" class="chat-bubble glass rounded-[2rem] p-5 border border-cyan-500/20">
-                <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-                    <span class="text-[10px] font-black text-cyan-400 uppercase">Live Support</span>
-                    <button onclick="toggleChat()">✕</button>
-                </div>
-                <div id="userChatDisplay" class="flex-1 overflow-y-auto space-y-3 mb-4 text-xs pr-2"></div>
-                <div class="flex gap-2">
-                    <input type="text" id="userChatInput" placeholder="Message..." class="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-xs outline-none">
-                    <button onclick="sendUserMsg()" class="bg-cyan-500 text-black p-3 rounded-xl font-bold">↑</button>
-                </div>
-            </div>
-            <button onclick="toggleChat()" class="bg-cyan-500 text-black w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center text-2xl font-bold">💬</button>
-        </div>
-
-        <main id="home" class="page active pt-36 px-6 max-w-5xl mx-auto">
-            <div class="glass p-10 rounded-[2.5rem] border border-white/5">
-                <p class="text-[10px] text-cyan-400 font-bold uppercase mb-2 tracking-widest">Feb 12, 2026</p>
-                <h3 class="text-3xl font-black mb-4">System Evolution</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">NexDrop Cloud is now live. Your orders and messages are synced across the global network in real-time.</p>
-            </div>
+        <main id="home" class="page active pt-36 px-6 max-w-4xl mx-auto">
+            <div id="slideshowContainer" class="space-y-6"></div>
         </main>
 
         <section id="market" class="page pt-36 px-6 max-w-6xl mx-auto">
             <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
         </section>
 
-        <section id="cart" class="page pt-36 px-6 max-w-2xl mx-auto">
-            <div class="glass p-8 rounded-[2rem]">
-                <h2 class="text-2xl font-black mb-6 uppercase">Your Selection</h2>
-                <div id="cartItems" class="space-y-4 mb-8"></div>
-                <div class="flex justify-between border-t border-white/10 pt-6 mb-8">
-                    <span class="text-gray-500 text-xs font-bold uppercase">Total</span>
-                    <span id="cartTotal" class="text-2xl font-black text-cyan-400">₦0</span>
-                </div>
-                <button onclick="checkout()" class="w-full bg-white text-black font-black py-4 rounded-2xl uppercase text-xs">Confirm Shipment</button>
-            </div>
-        </section>
-
-        <section id="profile" class="page pt-36 px-6 max-w-4xl mx-auto">
-            <div class="glass p-10 rounded-[2.5rem]">
-                <h2 id="profName" class="text-3xl font-black text-cyan-400 mb-2">User Name</h2>
-                <button onclick="logout()" class="text-red-500 text-[10px] font-black uppercase mt-4">Terminate Access</button>
+        <section id="profile" class="page pt-36 px-6 max-w-2xl mx-auto">
+            <div class="glass p-10 rounded-3xl">
+                <h2 id="profName" class="text-3xl font-black text-cyan-400 mb-6">Profile</h2>
+                <div id="userOrders" class="space-y-3"></div>
+                <button onclick="logout()" class="mt-10 text-red-500 text-[10px] font-black uppercase">Logout</button>
             </div>
         </section>
     </div>
 
-    <section id="adminPortal" class="pt-10 px-6 max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-10 border-b border-white/10 pb-8">
-            <h2 class="text-4xl font-black text-red-500 tracking-tighter">VENDOR HUB</h2>
-            <button onclick="logout()" class="bg-red-500 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase">Exit Hub</button>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <div class="glass p-8 rounded-[2rem] border-t-4 border-red-600 flex flex-col h-[600px]">
-                <h3 class="font-black text-xs text-gray-500 uppercase mb-6">Global Communication</h3>
-                <div id="adminInbox" class="flex-1 overflow-y-auto space-y-3 mb-6 pr-3"></div>
-                <div class="flex gap-2">
-                    <input type="text" id="adminReplyInput" class="flex-1 bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white" placeholder="Type reply...">
-                    <button onclick="adminReply()" class="bg-red-500 text-white px-8 rounded-2xl font-black uppercase">Send</button>
-                </div>
+    <section id="adminPortal" class="p-6 md:p-12">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-3xl font-black text-red-500">VENDOR HUB</h2>
+                <button onclick="logout()" class="bg-red-500 text-white px-6 py-2 rounded-xl text-xs font-bold">EXIT HUB</button>
             </div>
-            <div class="glass p-8 rounded-[2rem] border-t-4 border-red-600 h-[600px] overflow-y-auto">
-                <h3 class="font-black text-xs text-gray-500 uppercase mb-6">Live Logistics Queue</h3>
-                <div id="adminOrderList" class="space-y-4"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="glass p-8 rounded-[2rem] border-t-4 border-red-500 slide-in" style="animation-delay: 0.1s">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-6 tracking-widest">Inventory Manager</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="pName" placeholder="Product Name" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm">
+                        <input type="number" id="pPrice" placeholder="Price (₦)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm">
+                        <input type="text" id="pImage" placeholder="Image URL (Direct link)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm">
+                        <button onclick="uploadProduct()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold text-xs uppercase">Add to Market</button>
+                    </div>
+                </div>
+
+                <div class="glass p-8 rounded-[2rem] border-t-4 border-red-500 slide-in" style="animation-delay: 0.2s">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-6 tracking-widest">System Broadcast</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="bTitle" placeholder="Update Title" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm">
+                        <textarea id="bContent" placeholder="Broadcast Content..." class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm h-24"></textarea>
+                        <button onclick="uploadBlog()" class="w-full bg-white text-black py-3 rounded-xl font-bold text-xs uppercase">Post Update</button>
+                    </div>
+                </div>
+
+                <div class="glass p-8 rounded-[2rem] border-t-4 border-red-500 slide-in" style="animation-delay: 0.3s">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-6 tracking-widest">Live Logistics</h3>
+                    <div id="adminOrders" class="space-y-3 h-64 overflow-y-auto pr-2"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -135,140 +122,104 @@
         const rdb = firebase.database();
         const SECRET_HASH = "#open-sesame";
 
-        let db = {
-            products: [
-                {id: 1, name: "Neural Freight Link", price: 75000},
-                {id: 2, name: "Urban Stealth Courier", price: 12500},
-                {id: 3, name: "Global Air Drop", price: 150000}
-            ],
-            cart: []
-        };
-        
-        let session = JSON.parse(sessionStorage.getItem('user_session')) || null;
+        let session = JSON.parse(localStorage.getItem('user_persistent')) || null;
         let isLogin = true;
 
-        // REAL-TIME SYNC
-        rdb.ref('chats').on('value', (s) => { renderChat(s.val() ? Object.values(s.val()) : []); });
-        rdb.ref('orders').on('value', (s) => { renderOrders(s.val() ? Object.values(s.val()) : []); });
-
-        function checkUrlSecurity() {
-            if(window.location.hash === SECRET_HASH) {
-                sessionStorage.setItem('vendor_active', 'true');
-                document.body.classList.add('admin-active');
-            }
-        }
-
-        function toggleAuthMode() {
-            isLogin = !isLogin;
-            document.getElementById('regName').classList.toggle('hidden', isLogin);
-            document.getElementById('toggleBtn').innerText = isLogin ? 'Create New Profile' : 'Already have a profile?';
-        }
-
-        function handleCustomerAuth() {
-            const email = document.getElementById('authEmail').value.replace(/\./g, ',');
+        // AUTH LOGIC
+        function toggleAuth() { isLogin = !isLogin; document.getElementById('regName').classList.toggle('hidden', isLogin); }
+        function handleAuth() {
+            const email = document.getElementById('authEmail').value.trim().toLowerCase().replace(/\./g, ',');
             const pass = document.getElementById('authPass').value;
-            const name = document.getElementById('regName').value;
-
             if(isLogin) {
-                rdb.ref('users/' + email).once('value', (s) => {
+                rdb.ref('users/' + email).once('value', s => {
                     const u = s.val();
-                    if(u && u.pass === pass) {
-                        session = u;
-                        sessionStorage.setItem('user_session', JSON.stringify(u));
-                        location.reload();
-                    } else { alert("Access Denied."); }
+                    if(u && u.pass === pass) loginSuccess(u); else alert("Access Denied.");
                 });
             } else {
-                const u = { name, email, pass };
-                rdb.ref('users/' + email).set(u).then(() => {
-                    session = u;
-                    sessionStorage.setItem('user_session', JSON.stringify(u));
-                    location.reload();
-                });
+                const u = { name: document.getElementById('regName').value, email, pass };
+                rdb.ref('users/' + email).set(u).then(() => loginSuccess(u));
             }
         }
+        function loginSuccess(u) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); }
+        function logout() { localStorage.clear(); window.location.hash = ''; location.reload(); }
 
-        function logout() { sessionStorage.clear(); window.location.hash = ''; location.reload(); }
-        function toggleChat() { document.getElementById('chatBubble').classList.toggle('open'); }
+        // ADMIN ACTIONS
+        function uploadProduct() {
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const img = document.getElementById('pImage').value || 'https://via.placeholder.com/300';
+            rdb.ref('products').push({ name, price: parseInt(price), img }).then(() => alert("Product Active!"));
+        }
+
+        function uploadBlog() {
+            const title = document.getElementById('bTitle').value;
+            const content = document.getElementById('bContent').value;
+            rdb.ref('blogs').push({ title, content, date: new Date().toLocaleDateString() }).then(() => alert("Broadcast Sent!"));
+        }
+
+        // NAVIGATION
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            setTimeout(() => {
-                document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-                document.getElementById(id).style.display = 'block';
-                setTimeout(() => document.getElementById(id).classList.add('active'), 50);
-            }, 300);
+            document.getElementById(id).classList.add('active');
         }
 
-        function addToCart(id) {
-            db.cart.push({...db.products.find(p => p.id === id), cartId: Date.now()});
-            render();
-        }
-
-        function checkout() {
-            if(db.cart.length === 0) return;
-            db.cart.forEach(i => rdb.ref('orders').push({...i, userEmail: session.email, userName: session.name, status: 'Processing'}));
-            db.cart = [];
-            alert("Order Transmitted.");
-            showPage('profile');
-        }
-
-        function sendUserMsg() {
-            const t = document.getElementById('userChatInput').value;
-            if(!t) return;
-            rdb.ref('chats').push({ user: session.name, text: t, type: 'user' });
-            document.getElementById('userChatInput').value = '';
-        }
-
-        function adminReply() {
-            const t = document.getElementById('adminReplyInput').value;
-            if(!t) return;
-            rdb.ref('chats').push({ user: 'Admin', text: t, type: 'admin' });
-            document.getElementById('adminReplyInput').value = '';
-        }
-
-        function renderChat(msgs) {
-            const html = msgs.map(m => `<div class="flex flex-col ${m.type === 'admin' ? 'items-start' : 'items-end'} mb-2">
-                <div class="p-3 rounded-2xl ${m.type === 'admin' ? 'bg-cyan-500 text-black' : 'bg-white/10 text-white'} max-w-[85%]">${m.text}</div>
-            </div>`).join('');
-            if(document.getElementById('userChatDisplay')) document.getElementById('userChatDisplay').innerHTML = html;
-            if(document.getElementById('adminInbox')) document.getElementById('adminInbox').innerHTML = msgs.map(m => `
-                <div class="p-4 bg-white/5 rounded-2xl border-l-2 ${m.type === 'admin' ? 'border-red-500' : 'border-cyan-500'}">
-                    <p class="text-[9px] font-black uppercase text-gray-500">${m.user}</p>
-                    <p class="text-xs">${m.text}</p>
-                </div>`).join('');
-        }
-
-        function renderOrders(os) {
-            if(document.getElementById('adminOrderList')) {
-                document.getElementById('adminOrderList').innerHTML = os.map(o => `
-                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex justify-between">
-                        <div><p class="font-bold text-sm">${o.name}</p><p class="text-[10px] text-gray-500">${o.userName}</p></div>
-                        <span class="text-red-500 text-[10px] font-bold">${o.status}</span>
+        // REAL-TIME SYNC
+        function initSync() {
+            // Market Sync
+            rdb.ref('products').on('value', s => {
+                const data = s.val();
+                if(!data) return;
+                document.getElementById('marketGrid').innerHTML = Object.values(data).map(p => `
+                    <div class="glass overflow-hidden rounded-[2rem] border border-white/5 product-card slide-in">
+                        <img src="${p.img}" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h4 class="font-bold text-lg mb-1">${p.name}</h4>
+                            <p class="text-cyan-400 font-black mb-4">₦${p.price.toLocaleString()}</p>
+                            <button onclick="orderProduct('${p.name}', ${p.price})" class="w-full bg-white text-black py-3 rounded-xl text-[10px] font-black uppercase">Order Now</button>
+                        </div>
                     </div>`).join('');
-            }
-        }
+            });
 
-        function render() {
-            if(session) {
-                document.getElementById('authGate').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                document.getElementById('navName').innerText = session.name.split(' ')[0];
-                document.getElementById('profName').innerText = session.name;
-                document.getElementById('cartCount').innerText = db.cart.length;
-                document.getElementById('cartTotal').innerText = "₦" + db.cart.reduce((s, i) => s + i.price, 0).toLocaleString();
-                document.getElementById('marketGrid').innerHTML = db.products.map(p => `
-                    <div class="glass p-8 rounded-[2rem] border border-white/5">
-                        <h4 class="text-xl font-black mb-2">${p.name}</h4>
-                        <p class="text-cyan-400 font-mono mb-6">₦${p.price.toLocaleString()}</p>
-                        <button onclick="addToCart(${p.id})" class="w-full bg-white text-black py-3 rounded-xl text-[10px] font-black uppercase">Add to Cart</button>
+            // Slideshow/Blog Sync
+            rdb.ref('blogs').on('value', s => {
+                const data = s.val();
+                if(!data) return;
+                document.getElementById('slideshowContainer').innerHTML = Object.values(data).map(b => `
+                    <div class="glass p-10 rounded-[2.5rem] border border-white/5 slide-in">
+                        <p class="text-[10px] text-cyan-400 font-bold mb-2 uppercase tracking-[0.3em]">${b.date}</p>
+                        <h3 class="text-3xl font-black mb-4">${b.title}</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">${b.content}</p>
                     </div>`).join('');
-                document.getElementById('cartItems').innerHTML = db.cart.map(c => `
-                    <div class="flex justify-between p-4 bg-white/5 rounded-2xl"><span>${c.name}</span><span class="text-cyan-400">₦${c.price.toLocaleString()}</span></div>`).join('');
-            }
+            });
+
+            // Admin Orders
+            rdb.ref('orders').on('value', s => {
+                const data = s.val();
+                if(!data || !document.getElementById('adminOrders')) return;
+                document.getElementById('adminOrders').innerHTML = Object.values(data).map(o => `
+                    <div class="p-3 bg-white/5 rounded-xl text-[10px] border border-white/5">
+                        <p class="font-bold">${o.name} <span class="text-red-500">→ ${o.user}</span></p>
+                    </div>`).join('');
+            });
         }
 
-        checkUrlSecurity();
-        render();
+        function orderProduct(name, price) {
+            if(!session) return alert("Login required.");
+            rdb.ref('orders').push({ name, price, user: session.name, userEmail: session.email, status: 'Pending' })
+            .then(() => alert("Order logged in cloud."));
+        }
+
+        function checkAdmin() { if(window.location.hash === SECRET_HASH) document.body.classList.add('admin-active'); }
+        
+        window.onhashchange = checkAdmin;
+        checkAdmin();
+        initSync();
+        if(session) {
+            document.getElementById('authGate').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('navName').innerText = session.name;
+            document.getElementById('profName').innerText = session.name;
+        }
     </script>
 </body>
 </html>
