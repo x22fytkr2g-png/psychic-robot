@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexDrop | Pro Logistics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --cyan: #22d3ee; --bg: #020617; }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        #adminPortal { display: none; }
+        .admin-mode #adminPortal { display: block; }
+        .msg-bubble { padding: 8px 12px; border-radius: 15px; margin-bottom: 8px; font-size: 13px; max-width: 80%; word-wrap: break-word; }
+        .msg-user { background: #1e293b; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-admin { background: var(--cyan); color: #000; align-self: flex-end; border-bottom-right-radius: 2px; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <div id="authGate" class="min-h-screen flex items-center justify-center px-6">
+        <div class="max-w-md w-full glass p-8 rounded-[2rem] border border-cyan-500/20">
+            <h1 class="text-3xl font-black text-cyan-400 text-center mb-8">NEXDROP</h1>
+            <div id="authForm" class="space-y-4">
+                <input type="text" id="regName" placeholder="Full Name" class="hidden w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+                <input type="email" id="authEmail" placeholder="Email" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+                <input type="password" id="authPass" placeholder="Password" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
+                <button onclick="handleAuth()" id="authBtn" class="w-full bg-cyan-500 text-black font-black py-4 rounded-xl">LOG IN</button>
+                <button onclick="toggleAuth()" id="toggleBtn" class="w-full text-xs text-gray-500 mt-2">Need an account? Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="hidden">
+        <nav class="fixed top-0 w-full z-50 px-6 py-4">
+            <div class="max-w-6xl mx-auto glass rounded-2xl p-4 flex justify-between items-center">
+                <h1 class="text-xl font-black text-cyan-400 cursor-pointer" onclick="showPage('home')">NEXDROP</h1>
+                <div class="flex gap-5 text-[10px] font-bold uppercase tracking-widest items-center">
+                    <button onclick="showPage('home')">Home</button>
+                    <button onclick="showPage('market')">Market</button>
+                    <button onclick="showPage('cart')">Cart (<span id="cartCount">0</span>)</button>
+                    <button onclick="showPage('profile')" id="navName" class="bg-white/10 px-3 py-1 rounded">Profile</button>
+                </div>
+            </div>
+        </nav>
+
+        <main id="home" class="page active pt-32 px-6 max-w-4xl mx-auto">
+            <div id="blogContainer" class="space-y-6"></div>
+        </main>
+
+        <section id="market" class="page pt-32 px-6 max-w-6xl mx-auto">
+            <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="cart" class="page pt-32 px-6 max-w-2xl mx-auto">
+            <h2 class="text-2xl font-bold mb-6 text-cyan-400">Your Cart</h2>
+            <div id="cartItems" class="space-y-3 mb-6"></div>
+            <button onclick="checkout()" class="w-full bg-cyan-500 text-black font-black py-4 rounded-xl">PLACE ORDER</button>
+        </section>
+
+        <section id="profile" class="page pt-32 px-6 max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass p-6 rounded-3xl flex flex-col h-[450px]">
+                    <h2 class="text-xl font-bold text-cyan-400 mb-4">Support & Logistics</h2>
+                    <div id="userChatBox" class="flex-1 overflow-y-auto flex flex-col mb-4 pr-2"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="userMsgInput" placeholder="Reply to Admin..." class="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-sm">
+                        <button onclick="sendUserMsg()" class="bg-cyan-500 text-black px-4 rounded-xl font-bold">Send</button>
+                    </div>
+                </div>
+                <div class="glass p-6 rounded-3xl">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-4">Order History</h3>
+                    <div id="userOrders" class="space-y-2"></div>
+                    <button onclick="logout()" class="mt-10 text-red-500 text-[10px] font-bold">LOGOUT</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="adminPortal" class="page pt-32 px-6 max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="glass p-6 rounded-3xl border-t-2 border-cyan-500">
+                    <h3 class="font-bold text-cyan-400 mb-6 uppercase text-xs tracking-widest">Global Order Queue</h3>
+                    <div id="adminOrderList" class="space-y-4"></div>
+                </div>
+
+                <div class="glass p-6 rounded-3xl border-t-2 border-cyan-500 flex flex-col h-[500px]">
+                    <h3 class="font-bold text-cyan-400 mb-4 uppercase text-xs tracking-widest">Communication Hub</h3>
+                    <div id="adminInbox" class="flex-1 overflow-y-auto space-y-2 mb-4 pr-2"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="adminReplyInput" placeholder="Send message..." class="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none">
+                        <button onclick="adminReply()" class="bg-cyan-500 text-black px-4 rounded-xl font-bold">Send</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const SECRET_HASH = "#open-sesame";
+        const ADMIN_KEY = "nexdrop2026";
+
+        let db = JSON.parse(localStorage.getItem('nexdrop_v7')) || {
+            users: [], products: [{id: 1, name: "Eco-Express Delivery", price: 8500}],
+            blogs: [{title: "System Update", content: "Direct Admin-to-Customer messaging is live.", date: "12/02/2026"}],
+            orders: [], chat: [], cart: []
+        };
+        let session = JSON.parse(sessionStorage.getItem('activeUser')) || null;
+        let isLogin = true;
+
+        function save() { localStorage.setItem('nexdrop_v7', JSON.stringify(db)); render(); }
+
+        // --- AUTH ---
+        function toggleAuth() { isLogin = !isLogin; document.getElementById('regName').classList.toggle('hidden', isLogin); document.getElementById('authBtn').innerText = isLogin ? 'LOG IN' : 'CREATE ACCOUNT'; }
+        function handleAuth() {
+            const email = document.getElementById('authEmail').value, pass = document.getElementById('authPass').value, name = document.getElementById('regName').value;
+            if(isLogin) { const user = db.users.find(u => u.email === email && u.pass === pass); if(user) { session = user; } else { return alert("Denied"); }
+            } else { const user = { name, email, pass }; db.users.push(user); session = user; save(); }
+            sessionStorage.setItem('activeUser', JSON.stringify(session)); location.reload();
+        }
+        function logout() { sessionStorage.clear(); location.reload(); }
+
+        // --- NAVIGATION ---
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+        // --- SHOP ---
+        function addToCart(id) { db.cart.push(db.products.find(p => p.id === id)); save(); }
+        function checkout() {
+            if(!session) return showPage('authGate');
+            db.cart.forEach(i => db.orders.unshift({...i, orderId: Date.now(), user: session.email, userName: session.name, status: 'Pending'}));
+            db.cart = []; save(); alert("Logistics request received."); showPage('profile');
+        }
+
+        // --- PRO MESSAGING ---
+        function adminTextCustomer(customerEmail, customerName) {
+            const firstMsg = prompt(`Message for ${customerName}:`, "Hello, I am processing your order. Please confirm your delivery address.");
+            if(firstMsg) {
+                db.chat.push({ user: 'Admin', targetUser: customerEmail, text: firstMsg, type: 'admin' });
+                save();
+            }
+        }
+
+        function sendUserMsg() {
+            const txt = document.getElementById('userMsgInput').value;
+            if(!txt) return;
+            db.chat.push({ user: session.name, email: session.email, text: txt, type: 'user' });
+            document.getElementById('userMsgInput').value = '';
+            save();
+        }
+
+        function adminReply() {
+            const txt = document.getElementById('adminReplyInput').value;
+            if(!txt) return;
+            db.chat.push({ user: 'Admin', text: txt, type: 'admin' });
+            document.getElementById('adminReplyInput').value = '';
+            save();
+        }
+
+        // --- RENDER ---
+        function render() {
+            if(!session) return;
+            document.getElementById('authGate').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('navName').innerText = session.name.split(' ')[0];
+
+            // Market
+            document.getElementById('marketGrid').innerHTML = db.products.map(p => `
+                <div class="glass p-6 rounded-2xl border border-white/5">
+                    <h4 class="font-bold text-cyan-400">${p.name}</h4>
+                    <p class="font-mono mb-4 text-xs">₦${p.price.toLocaleString()}</p>
+                    <button onclick="addToCart(${p.id})" class="w-full bg-white text-black py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">Order</button>
+                </div>
+            `).join('');
+
+            // Cart
+            document.getElementById('cartCount').innerText = db.cart.length;
+            document.getElementById('cartItems').innerHTML = db.cart.map(c => `<div class="glass p-4 rounded-xl flex justify-between text-xs"><span>${c.name}</span><span class="text-cyan-400 font-bold">₦${c.price}</span></div>`).join('');
+
+            // Chat (Customer View)
+            document.getElementById('userChatBox').innerHTML = db.chat.map(m => `
+                <div class="msg-bubble ${m.type === 'user' ? 'msg-user' : 'msg-admin'}">
+                    <p class="text-[10px] opacity-40 font-bold uppercase mb-1">${m.user}</p>
+                    <p>${m.text}</p>
+                </div>
+            `).join('');
+
+            // Admin: Global Order Queue with TEXT functionality
+            document.getElementById('adminOrderList').innerHTML = db.orders.map(o => `
+                <div class="glass p-4 rounded-2xl flex flex-col gap-3 border border-white/5">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold">${o.name}</span>
+                        <span class="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded-full uppercase">${o.status}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] text-gray-500 italic">${o.userName} (${o.user})</span>
+                        <button onclick="adminTextCustomer('${o.user}', '${o.userName}')" class="bg-cyan-500 text-black px-3 py-1 rounded-lg text-[10px] font-black uppercase">Text Customer</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Admin: Inbox
+            document.getElementById('adminInbox').innerHTML = db.chat.map(m => `
+                <div class="p-3 border-b border-white/5 text-[11px] hover:bg-white/5 transition">
+                    <span class="${m.type === 'admin' ? 'text-cyan-400' : 'text-gray-400'} font-black uppercase text-[9px] mr-2">${m.user}:</span>
+                    <span class="text-gray-300">${m.text}</span>
+                </div>
+            `).join('');
+
+            // Home Blogs
+            document.getElementById('blogContainer').innerHTML = db.blogs.map(b => `<div class="glass p-8 rounded-3xl"><h3 class="text-2xl font-bold mb-3">${b.title}</h3><p class="text-gray-400 text-sm leading-relaxed">${b.content}</p></div>`).join('');
+        }
+
+        window.onhashchange = () => { if(window.location.hash === SECRET_HASH) { document.body.classList.add('admin-mode'); showPage('adminPortal'); } };
+        if(window.location.hash === SECRET_HASH) { document.body.classList.add('admin-mode'); showPage('adminPortal'); }
+        render();
+    </script>
+</body>
+</html>
