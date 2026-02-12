@@ -3,110 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexDrop | Command Center</title>
+    <title>NexDrop v14 | Logistics & Social OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --cyan: #22d3ee; --bg: #020617; }
-        body { background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        
-        /* Slide Animations */
-        .slide-in { animation: slideRight 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; opacity: 0; }
-        @keyframes slideRight { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
-        
+        :root { --bg: #ffffff; --text: #000000; --blue: #2563eb; --glass: rgba(255, 255, 255, 0.9); --border: rgba(0,0,0,0.1); }
+        .dark-mode { --bg: #020617; --text: #ffffff; --blue: #3b82f6; --glass: rgba(15, 23, 42, 0.9); --border: rgba(255,255,255,0.1); }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: 0.4s; overflow-x: hidden; }
+        .glass { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); }
         .page { display: none; }
-        .page.active { display: block; }
-
-        /* Admin Dashboard Layout */
-        #adminPortal { display: none; background: #070a13; min-height: 100vh; }
-        .admin-active #adminPortal { display: block !important; }
-        .admin-active #authGate, .admin-active #mainApp { display: none !important; }
+        .page.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .product-card:hover img { transform: scale(1.1); }
-        img { transition: transform 0.5s ease; }
+        .slide { display: none; width: 100%; height: 400px; object-fit: cover; border-radius: 2.5rem; }
+        .slide.active { display: block; }
+
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; display: inline-block; }
+        .online { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .offline { background: #94a3b8; }
+        
+        .bubble { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 13px; margin-bottom: 8px; }
+        .sent { background: var(--blue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .received { background: #f1f5f9; color: black; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .dark-mode .received { background: #1e293b; color: white; }
+
+        #adminChatBox { display: none; position: fixed; bottom: 90px; right: 25px; width: 320px; height: 450px; z-index: 1000; flex-direction: column; }
     </style>
 </head>
 <body>
 
     <div id="authGate" class="min-h-screen flex items-center justify-center px-6">
-        <div class="max-w-md w-full glass p-10 rounded-[2.5rem] border border-cyan-500/20 text-center slide-in">
-            <h1 class="text-4xl font-black text-cyan-400 mb-8 tracking-tighter">NEXDROP</h1>
-            <div class="space-y-4">
-                <input type="text" id="regName" placeholder="Full Name" class="hidden w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white">
-                <input type="email" id="authEmail" placeholder="Email Address" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white">
-                <input type="password" id="authPass" placeholder="Secure Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white">
-                <button onclick="handleAuth()" class="w-full bg-cyan-500 text-black font-black py-4 rounded-2xl">INITIALIZE</button>
-                <button onclick="toggleAuth()" id="toggleBtn" class="text-[10px] text-gray-500 mt-4 uppercase font-bold">New Account</button>
+        <div class="max-w-md w-full glass p-10 rounded-[3rem] text-center shadow-2xl">
+            <h1 class="text-4xl font-black text-blue italic tracking-tighter mb-2">NEXDROP</h1>
+            <p class="text-[10px] font-bold opacity-40 uppercase tracking-[0.3em] mb-8">Secure Access Portal</p>
+            
+            <div id="regFields" class="hidden space-y-4 mb-4">
+                <input type="text" id="regName" placeholder="Full Name" class="w-full bg-black/5 p-4 rounded-2xl outline-none border border-transparent focus:border-blue">
             </div>
+            <input type="email" id="authEmail" placeholder="Email" class="w-full bg-black/5 p-4 rounded-2xl outline-none mb-4">
+            <input type="password" id="authPass" placeholder="Password" class="w-full bg-black/5 p-4 rounded-2xl outline-none mb-6">
+            
+            <button onclick="handleAuth()" class="w-full bg-blue text-white font-black py-4 rounded-2xl shadow-lg">INITIALIZE</button>
+            <button onclick="toggleAuth()" id="toggleBtn" class="text-[10px] font-black uppercase opacity-50 mt-6 hover:text-blue">Create New Account</button>
         </div>
     </div>
 
     <div id="mainApp" class="hidden">
-        <nav class="fixed top-0 w-full z-50 px-6 py-5">
-            <div class="max-w-6xl mx-auto glass rounded-2xl p-4 flex justify-between items-center">
-                <h1 class="text-xl font-black text-cyan-400 cursor-pointer" onclick="showPage('home')">NEXDROP</h1>
-                <div class="flex gap-6 text-[10px] font-bold uppercase tracking-widest items-center">
-                    <button onclick="showPage('market')">Market</button>
-                    <button onclick="showPage('profile')" id="navName" class="text-cyan-400">User</button>
+        <nav class="fixed top-0 w-full z-[100] px-4 py-4">
+            <div class="max-w-6xl mx-auto glass rounded-[2rem] p-3 flex justify-between items-center px-8 shadow-xl">
+                <h1 class="text-2xl font-black text-blue cursor-pointer" onclick="showPage('home')">ND</h1>
+                <div class="hidden md:flex gap-8 items-center">
+                    <button onclick="showPage('home')" class="flex flex-col items-center text-[9px] font-black uppercase"><i class="fa-solid fa-house text-lg mb-1"></i>Home</button>
+                    <button onclick="showPage('social')" class="flex flex-col items-center text-[9px] font-black uppercase"><i class="fa-solid fa-users text-lg mb-1"></i>Network</button>
+                    <button onclick="showPage('messages')" class="flex flex-col items-center text-[9px] font-black uppercase"><i class="fa-solid fa-comment-dots text-lg mb-1"></i>Chat</button>
+                    <button onclick="showPage('profile')" class="border-l border-blue/20 pl-6"><img id="navPfp" class="w-10 h-10 rounded-full border-2 border-blue object-cover"></button>
+                    <button onclick="toggleTheme()" class="text-xl ml-4">🌓</button>
+                </div>
+                <div class="md:hidden flex gap-4">
+                    <button onclick="showPage('messages')" class="text-xl"><i class="fa-solid fa-comment-dots"></i></button>
+                    <button onclick="toggleMenu()" class="text-xl text-blue"><i class="fa-solid fa-bars-staggered"></i></button>
                 </div>
             </div>
         </nav>
 
-        <main id="home" class="page active pt-36 px-6 max-w-4xl mx-auto">
-            <div id="slideshowContainer" class="space-y-6"></div>
+        <main id="home" class="page active pt-32 px-6 max-w-2xl mx-auto pb-24">
+            <div class="relative mb-12 rounded-[2.5rem] overflow-hidden glass p-2 shadow-2xl">
+                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800" class="slide active">
+                <img src="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?w=800" class="slide">
+            </div>
+            <div id="blogContainer" class="space-y-12"></div>
         </main>
 
-        <section id="market" class="page pt-36 px-6 max-w-6xl mx-auto">
-            <div id="marketGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
-        </section>
-
-        <section id="profile" class="page pt-36 px-6 max-w-2xl mx-auto">
-            <div class="glass p-10 rounded-3xl">
-                <h2 id="profName" class="text-3xl font-black text-cyan-400 mb-6">Profile</h2>
-                <div id="userOrders" class="space-y-3"></div>
-                <button onclick="logout()" class="mt-10 text-red-500 text-[10px] font-black uppercase">Logout</button>
-            </div>
-        </section>
-    </div>
-
-    <section id="adminPortal" class="p-6 md:p-12">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-center mb-12">
-                <h2 class="text-3xl font-black text-red-500">VENDOR HUB</h2>
-                <button onclick="logout()" class="bg-red-500 text-white px-6 py-2 rounded-xl text-xs font-bold">EXIT HUB</button>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="glass p-8 rounded-[2rem] border-t-4 border-red-500 slide-in" style="animation-delay: 0.1s">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-6 tracking-widest">Inventory Manager</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="pName" placeholder="Product Name" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm">
-                        <input type="number" id="pPrice" placeholder="Price (₦)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm">
-                        <input type="text" id="pImage" placeholder="Image URL (Direct link)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm">
-                        <button onclick="uploadProduct()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold text-xs uppercase">Add to Market</button>
+        <section id="messages" class="page pt-32 px-6 max-w-5xl mx-auto h-[85vh]">
+            <div class="glass rounded-[3rem] h-full flex overflow-hidden shadow-2xl">
+                <div class="w-1/3 border-r border-black/5 bg-black/5 flex flex-col">
+                    <div id="sidebarFriends" class="flex-1 overflow-y-auto"></div>
+                </div>
+                <div class="flex-1 flex flex-col">
+                    <div id="chatHeader" class="p-6 border-b border-black/5 font-black text-blue">Select a friend</div>
+                    <div id="chatBox" class="flex-1 overflow-y-auto p-8 flex flex-col"></div>
+                    <div id="chatInputArea" class="hidden p-6 border-t border-black/5 flex gap-3">
+                        <input id="chatIn" class="flex-1 bg-black/5 p-4 rounded-2xl outline-none" placeholder="Type message...">
+                        <button onclick="sendPrivateMsg()" class="bg-blue text-white px-8 rounded-2xl font-black">SEND</button>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="glass p-8 rounded-[2rem] border-t-4 border-red-500 slide-in" style="animation-delay: 0.2s">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-6 tracking-widest">System Broadcast</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="bTitle" placeholder="Update Title" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm">
-                        <textarea id="bContent" placeholder="Broadcast Content..." class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-sm h-24"></textarea>
-                        <button onclick="uploadBlog()" class="w-full bg-white text-black py-3 rounded-xl font-bold text-xs uppercase">Post Update</button>
-                    </div>
-                </div>
-
-                <div class="glass p-8 rounded-[2rem] border-t-4 border-red-500 slide-in" style="animation-delay: 0.3s">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-6 tracking-widest">Live Logistics</h3>
-                    <div id="adminOrders" class="space-y-3 h-64 overflow-y-auto pr-2"></div>
-                </div>
+        <div id="adminChatBox" class="glass rounded-3xl overflow-hidden flex shadow-2xl">
+            <div class="bg-blue p-4 text-white font-black text-[10px] flex justify-between"><span>SUPPORT</span><button onclick="toggleChat()">✕</button></div>
+            <div id="admDisplay" class="flex-1 overflow-y-auto p-4 flex flex-col"></div>
+            <div class="p-3 border-t flex gap-2">
+                <input id="admIn" class="flex-1 bg-black/5 p-2 rounded-xl text-xs outline-none" placeholder="Ask Admin...">
+                <button onclick="sendAdmMsg()" class="bg-blue text-white px-4 rounded-xl font-bold">SEND</button>
             </div>
         </div>
-    </section>
+        <button onclick="toggleChat()" class="fixed bottom-6 right-6 bg-blue text-white w-14 h-14 rounded-full shadow-2xl z-50 flex items-center justify-center"><i class="fa-solid fa-headset text-xl"></i></button>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD7pEnf4eAAtuFfvy4ff-zt1s239lOjQB4",
@@ -117,109 +113,129 @@
             appId: "1:315627368280:web:546d377a78463c3d8a7f2d",
             databaseURL: "https://nextdrop-21a5e-default-rtdb.firebaseio.com"
         };
-
         firebase.initializeApp(firebaseConfig);
         const rdb = firebase.database();
-        const SECRET_HASH = "#open-sesame";
-
         let session = JSON.parse(localStorage.getItem('user_persistent')) || null;
         let isLogin = true;
 
         // AUTH LOGIC
-        function toggleAuth() { isLogin = !isLogin; document.getElementById('regName').classList.toggle('hidden', isLogin); }
+        function toggleAuth() { 
+            isLogin = !isLogin; 
+            document.getElementById('regFields').classList.toggle('hidden', isLogin);
+            document.getElementById('toggleBtn').innerText = isLogin ? "Create New Account" : "Back to Login";
+        }
+
         function handleAuth() {
             const email = document.getElementById('authEmail').value.trim().toLowerCase().replace(/\./g, ',');
-            const pass = document.getElementById('authPass').value;
+            const pass = document.getElementById('authPass').value.trim();
+            if(!email || !pass) return alert("Fill all fields");
+
             if(isLogin) {
-                rdb.ref('users/' + email).once('value', s => {
+                rdb.ref('users/'+email).once('value', s => {
                     const u = s.val();
-                    if(u && u.pass === pass) loginSuccess(u); else alert("Access Denied.");
+                    if(u && u.pass === pass) { 
+                        localStorage.setItem('user_persistent', JSON.stringify(u)); 
+                        location.reload(); 
+                    } else alert("Wrong credentials");
                 });
             } else {
-                const u = { name: document.getElementById('regName').value, email, pass };
-                rdb.ref('users/' + email).set(u).then(() => loginSuccess(u));
+                const name = document.getElementById('regName').value;
+                const u = { name, email, pass, pfp: "https://via.placeholder.com/150", loc: "Lagos", bio: "Available" };
+                rdb.ref('users/'+email).set(u).then(() => {
+                    localStorage.setItem('user_persistent', JSON.stringify(u));
+                    location.reload();
+                });
             }
         }
-        function loginSuccess(u) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); }
-        function logout() { localStorage.clear(); window.location.hash = ''; location.reload(); }
 
-        // ADMIN ACTIONS
-        function uploadProduct() {
-            const name = document.getElementById('pName').value;
-            const price = document.getElementById('pPrice').value;
-            const img = document.getElementById('pImage').value || 'https://via.placeholder.com/300';
-            rdb.ref('products').push({ name, price: parseInt(price), img }).then(() => alert("Product Active!"));
-        }
-
-        function uploadBlog() {
-            const title = document.getElementById('bTitle').value;
-            const content = document.getElementById('bContent').value;
-            rdb.ref('blogs').push({ title, content, date: new Date().toLocaleDateString() }).then(() => alert("Broadcast Sent!"));
-        }
-
-        // NAVIGATION
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        // REAL-TIME SYNC
-        function initSync() {
-            // Market Sync
-            rdb.ref('products').on('value', s => {
-                const data = s.val();
-                if(!data) return;
-                document.getElementById('marketGrid').innerHTML = Object.values(data).map(p => `
-                    <div class="glass overflow-hidden rounded-[2rem] border border-white/5 product-card slide-in">
-                        <img src="${p.img}" class="w-full h-48 object-cover">
-                        <div class="p-6">
-                            <h4 class="font-bold text-lg mb-1">${p.name}</h4>
-                            <p class="text-cyan-400 font-black mb-4">₦${p.price.toLocaleString()}</p>
-                            <button onclick="orderProduct('${p.name}', ${p.price})" class="w-full bg-white text-black py-3 rounded-xl text-[10px] font-black uppercase">Order Now</button>
-                        </div>
-                    </div>`).join('');
-            });
-
-            // Slideshow/Blog Sync
-            rdb.ref('blogs').on('value', s => {
-                const data = s.val();
-                if(!data) return;
-                document.getElementById('slideshowContainer').innerHTML = Object.values(data).map(b => `
-                    <div class="glass p-10 rounded-[2.5rem] border border-white/5 slide-in">
-                        <p class="text-[10px] text-cyan-400 font-bold mb-2 uppercase tracking-[0.3em]">${b.date}</p>
-                        <h3 class="text-3xl font-black mb-4">${b.title}</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">${b.content}</p>
-                    </div>`).join('');
-            });
-
-            // Admin Orders
-            rdb.ref('orders').on('value', s => {
-                const data = s.val();
-                if(!data || !document.getElementById('adminOrders')) return;
-                document.getElementById('adminOrders').innerHTML = Object.values(data).map(o => `
-                    <div class="p-3 bg-white/5 rounded-xl text-[10px] border border-white/5">
-                        <p class="font-bold">${o.name} <span class="text-red-500">→ ${o.user}</span></p>
-                    </div>`).join('');
-            });
-        }
-
-        function orderProduct(name, price) {
-            if(!session) return alert("Login required.");
-            rdb.ref('orders').push({ name, price, user: session.name, userEmail: session.email, status: 'Pending' })
-            .then(() => alert("Order logged in cloud."));
-        }
-
-        function checkAdmin() { if(window.location.hash === SECRET_HASH) document.body.classList.add('admin-active'); }
+        // NAVIGATION & UI
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
+        function toggleChat() { const c = document.getElementById('adminChatBox'); c.style.display = (c.style.display === 'flex') ? 'none' : 'flex'; }
         
-        window.onhashchange = checkAdmin;
-        checkAdmin();
-        initSync();
-        if(session) {
+        // SLIDESHOW
+        let sPos = 0;
+        const slides = document.querySelectorAll('.slide');
+        if(slides.length) setInterval(() => { slides[sPos].classList.remove('active'); sPos = (sPos + 1) % slides.length; slides[sPos].classList.add('active'); }, 4000);
+
+        // SYNC & MESSAGING
+        function initApp() {
+            if(!session) {
+                document.getElementById('authGate').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('hidden');
+                return;
+            }
             document.getElementById('authGate').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('navName').innerText = session.name;
-            document.getElementById('profName').innerText = session.name;
+            document.getElementById('navPfp').src = session.pfp;
+
+            // Online Status
+            const statusRef = rdb.ref(`status/${session.email}`);
+            rdb.ref('.info/connected').on('value', snap => {
+                if(snap.val()) {
+                    statusRef.onDisconnect().set({ state: 'offline' });
+                    statusRef.set({ state: 'online' });
+                }
+            });
+
+            // Friends Sidebar
+            rdb.ref(`users/${session.email}/friends`).on('value', s => {
+                const sidebar = document.getElementById('sidebarFriends');
+                sidebar.innerHTML = '';
+                const friends = s.val() || {};
+                Object.keys(friends).forEach(fEmail => {
+                    rdb.ref('users/'+fEmail).once('value', us => {
+                        const u = us.val();
+                        rdb.ref('status/'+fEmail).on('value', ss => {
+                            const isOnline = ss.val()?.state === 'online';
+                            const div = document.createElement('div');
+                            div.className = "p-4 flex items-center gap-4 hover:bg-blue/5 cursor-pointer border-b border-black/5";
+                            div.onclick = () => startChat(fEmail, u.name);
+                            div.innerHTML = `<div class="relative"><img src="${u.pfp}" class="w-10 h-10 rounded-full object-cover">
+                                             <div class="absolute bottom-0 right-0 status-dot ${isOnline?'online':'offline'}"></div></div>
+                                             <p class="text-xs font-bold">${u.name}</p>`;
+                            sidebar.appendChild(div);
+                        });
+                    });
+                });
+            });
+
+            // Admin Chat Sync
+            rdb.ref(`admin_support/${session.email.replace(/,/g,'-')}`).on('value', s => {
+                const msgs = s.val() ? Object.values(s.val()) : [];
+                document.getElementById('admDisplay').innerHTML = msgs.map(m => `<div class="bubble ${m.sender===session.name?'sent':'received'}">${m.text}</div>`).join('');
+            });
         }
+
+        let activeChat = null;
+        function startChat(email, name) {
+            activeChat = email;
+            document.getElementById('chatHeader').innerText = "Chatting with " + name;
+            document.getElementById('chatInputArea').classList.remove('hidden');
+            const key = [session.email, email].sort().join('_').replace(/,/g,'');
+            rdb.ref(`chats/${key}`).on('value', s => {
+                const msgs = s.val() ? Object.values(s.val()) : [];
+                document.getElementById('chatBox').innerHTML = msgs.map(m => `<div class="bubble ${m.sender===session.email?'sent':'received'}">${m.text}</div>`).join('');
+                const d = document.getElementById('chatBox'); d.scrollTop = d.scrollHeight;
+            });
+        }
+
+        function sendPrivateMsg() {
+            const val = document.getElementById('chatIn').value;
+            if(!val || !activeChat) return;
+            const key = [session.email, activeChat].sort().join('_').replace(/,/g,'');
+            rdb.ref(`chats/${key}`).push({ sender: session.email, text: val });
+            document.getElementById('chatIn').value = '';
+        }
+
+        function sendAdmMsg() {
+            const val = document.getElementById('admIn').value;
+            if(!val) return;
+            rdb.ref(`admin_support/${session.email.replace(/,/g,'-')}`).push({ sender: session.name, text: val });
+            document.getElementById('admIn').value = '';
+        }
+
+        initApp();
     </script>
 </body>
 </html>
