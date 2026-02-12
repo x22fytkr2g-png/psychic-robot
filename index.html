@@ -3,102 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexDrop v14 | Logistics & Social OS</title>
+    <title>NextDrop | Unified Logistics</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --bg: #ffffff; --text: #000000; --blue: #2563eb; --glass: rgba(255, 255, 255, 0.9); --border: rgba(0,0,0,0.1); }
-        .dark-mode { --bg: #020617; --text: #ffffff; --blue: #3b82f6; --glass: rgba(15, 23, 42, 0.9); --border: rgba(255,255,255,0.1); }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: 0.4s; overflow-x: hidden; }
-        .glass { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); }
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.4s ease; }
+        :root { --neon: #00f2ff; --slate: #020617; }
+        body { background: var(--slate); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        #authGate, #mainApp, #adminPortal { display: none; position: absolute; inset: 0; background: var(--slate); overflow-y: auto; z-index: 10; }
+        .page { display: none; animation: fadeIn 0.4s ease-out; padding-bottom: 120px; }
+        .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .slide { display: none; width: 100%; height: 400px; object-fit: cover; border-radius: 2.5rem; }
-        .slide.active { display: block; }
 
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid white; display: inline-block; }
-        .online { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-        .offline { background: #94a3b8; }
-        
-        .bubble { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 13px; margin-bottom: 8px; }
-        .sent { background: var(--blue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .received { background: #f1f5f9; color: black; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .dark-mode .received { background: #1e293b; color: white; }
+        .item-card { background: rgba(30, 41, 59, 0.4); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.03); transition: 0.3s; }
+        .slide-item { position: absolute; inset: 0; opacity: 0; transition: 0.8s ease-in-out; }
+        .slide-item.active { opacity: 1; }
 
-        #adminChatBox { display: none; position: fixed; bottom: 90px; right: 25px; width: 320px; height: 450px; z-index: 1000; flex-direction: column; }
+        input, textarea { background: rgba(255,255,255,0.07) !important; color: white !important; border-radius: 12px; border: none !important; }
+        .btn-main { background: var(--neon); color: black; font-weight: 800; border-radius: 1rem; transition: 0.2s; }
+        
+        /* Profile Layout Fix */
+        .profile-container { background: linear-gradient(145deg, rgba(15,23,42,0.8), rgba(2,6,23,0.9)); backdrop-blur: 15px; border: 1px solid rgba(0,242,255,0.1); }
     </style>
 </head>
 <body>
 
-    <div id="authGate" class="min-h-screen flex items-center justify-center px-6">
-        <div class="max-w-md w-full glass p-10 rounded-[3rem] text-center shadow-2xl">
-            <h1 class="text-4xl font-black text-blue italic tracking-tighter mb-2">NEXDROP</h1>
-            <p class="text-[10px] font-bold opacity-40 uppercase tracking-[0.3em] mb-8">Secure Access Portal</p>
-            
-            <div id="regFields" class="hidden space-y-4 mb-4">
-                <input type="text" id="regName" placeholder="Full Name" class="w-full bg-black/5 p-4 rounded-2xl outline-none border border-transparent focus:border-blue">
+    <div id="authGate" class="flex items-center justify-center p-6 bg-slate-950">
+        <div class="max-w-md w-full text-center">
+            <h1 class="text-5xl font-black italic mb-2 tracking-tighter">NextDrop</h1>
+            <p id="authSub" class="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.4em] mb-10">Welcome Back</p>
+            <div class="bg-slate-900/50 p-8 rounded-[2.5rem] border border-white/5 space-y-4">
+                <div id="signupFields" class="hidden space-y-4">
+                    <input type="text" id="regName" placeholder="Full Name" class="w-full p-4 outline-none">
+                </div>
+                <input type="email" id="authEmail" placeholder="Email Address" class="w-full p-4 outline-none">
+                <input type="password" id="authPass" placeholder="Access Key" class="w-full p-4 outline-none">
+                <button onclick="handleAuth()" id="mainAuthBtn" class="w-full btn-main py-4">INITIALIZE</button>
+                <div class="flex flex-col gap-3 pt-4">
+                    <button onclick="toggleAuthMode()" id="switchAuthBtn" class="text-xs font-bold text-slate-400">New here? <span class="text-cyan-400">Create Account</span></button>
+                    <button onclick="initRecovery()" class="text-[9px] uppercase tracking-widest font-black text-cyan-400/40">Forgot Access Key?</button>
+                </div>
             </div>
-            <input type="email" id="authEmail" placeholder="Email" class="w-full bg-black/5 p-4 rounded-2xl outline-none mb-4">
-            <input type="password" id="authPass" placeholder="Password" class="w-full bg-black/5 p-4 rounded-2xl outline-none mb-6">
-            
-            <button onclick="handleAuth()" class="w-full bg-blue text-white font-black py-4 rounded-2xl shadow-lg">INITIALIZE</button>
-            <button onclick="toggleAuth()" id="toggleBtn" class="text-[10px] font-black uppercase opacity-50 mt-6 hover:text-blue">Create New Account</button>
         </div>
     </div>
 
-    <div id="mainApp" class="hidden">
-        <nav class="fixed top-0 w-full z-[100] px-4 py-4">
-            <div class="max-w-6xl mx-auto glass rounded-[2rem] p-3 flex justify-between items-center px-8 shadow-xl">
-                <h1 class="text-2xl font-black text-blue cursor-pointer" onclick="showPage('home')">ND</h1>
-                <div class="hidden md:flex gap-8 items-center">
-                    <button onclick="showPage('home')" class="flex flex-col items-center text-[9px] font-black uppercase"><i class="fa-solid fa-house text-lg mb-1"></i>Home</button>
-                    <button onclick="showPage('social')" class="flex flex-col items-center text-[9px] font-black uppercase"><i class="fa-solid fa-users text-lg mb-1"></i>Network</button>
-                    <button onclick="showPage('messages')" class="flex flex-col items-center text-[9px] font-black uppercase"><i class="fa-solid fa-comment-dots text-lg mb-1"></i>Chat</button>
-                    <button onclick="showPage('profile')" class="border-l border-blue/20 pl-6"><img id="navPfp" class="w-10 h-10 rounded-full border-2 border-blue object-cover"></button>
-                    <button onclick="toggleTheme()" class="text-xl ml-4">🌓</button>
-                </div>
-                <div class="md:hidden flex gap-4">
-                    <button onclick="showPage('messages')" class="text-xl"><i class="fa-solid fa-comment-dots"></i></button>
-                    <button onclick="toggleMenu()" class="text-xl text-blue"><i class="fa-solid fa-bars-staggered"></i></button>
-                </div>
+    <div id="recoveryModal" class="fixed inset-0 bg-black/95 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-xl">
+        <div class="bg-slate-900 p-8 rounded-[2.5rem] w-full max-w-sm text-center border border-cyan-500/20">
+            <h2 class="text-xl font-black mb-6">RECOVERY_MODE</h2>
+            <div id="recStep1" class="space-y-4">
+                <input type="email" id="recEmail" placeholder="Enter Neural Email" class="w-full p-4 outline-none">
+                <button onclick="sendRecoveryCode()" class="w-full btn-main py-4">VERIFY RECORD</button>
             </div>
+            <div id="recStep2" class="hidden space-y-4">
+                <p class="text-xs text-cyan-400">Record found. Enter new key.</p>
+                <input type="password" id="newKey" placeholder="New Access Key" class="w-full p-4 outline-none">
+                <button onclick="resetKey()" class="w-full btn-main py-4">UPDATE_KEY</button>
+            </div>
+            <button onclick="closeRecovery()" class="mt-6 text-[10px] text-red-500 font-black uppercase">Cancel</button>
+        </div>
+    </div>
+
+    <div id="mainApp">
+        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-lg bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-full px-8 py-4 flex justify-between items-center shadow-2xl">
+            <button onclick="showPage('market')" class="text-cyan-400"><i class="fa-solid fa-store"></i></button>
+            <button onclick="showPage('orders')" class="text-slate-400"><i class="fa-solid fa-truck-fast"></i></button>
+            <button onclick="toggleChat()" class="text-slate-400"><i class="fa-solid fa-headset"></i></button>
+            <button onclick="showPage('profile')" class="w-10 h-10 rounded-full border-2 border-cyan-400 overflow-hidden">
+                <img id="navPfp" class="w-full h-full object-cover">
+            </button>
         </nav>
 
-        <main id="home" class="page active pt-32 px-6 max-w-2xl mx-auto pb-24">
-            <div class="relative mb-12 rounded-[2.5rem] overflow-hidden glass p-2 shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800" class="slide active">
-                <img src="https://images.unsplash.com/photo-1566576721346-d4a3b4eaad5b?w=800" class="slide">
-            </div>
-            <div id="blogContainer" class="space-y-12"></div>
+        <main id="market" class="page active pt-10 px-6 max-w-xl mx-auto">
+            <div id="slideshow" class="h-44 rounded-[2rem] bg-slate-900 mb-8 border border-white/5 overflow-hidden relative shadow-2xl flex items-center justify-center text-[10px] opacity-20">Syncing...</div>
+            <div id="marketGrid" class="space-y-6"></div>
         </main>
 
-        <section id="messages" class="page pt-32 px-6 max-w-5xl mx-auto h-[85vh]">
-            <div class="glass rounded-[3rem] h-full flex overflow-hidden shadow-2xl">
-                <div class="w-1/3 border-r border-black/5 bg-black/5 flex flex-col">
-                    <div id="sidebarFriends" class="flex-1 overflow-y-auto"></div>
+        <section id="orders" class="page pt-10 px-6 max-w-xl mx-auto">
+            <h2 class="text-2xl font-black mb-6">Shipments</h2>
+            <div id="orderList" class="space-y-4"></div>
+        </section>
+
+        <section id="profile" class="page pt-10 px-6 max-w-md mx-auto">
+            <div class="profile-container p-8 rounded-[3rem] text-center shadow-2xl">
+                <div class="relative w-32 h-32 mx-auto mb-4">
+                    <img id="profPfp" class="w-full h-full rounded-full object-cover border-4 border-cyan-400 shadow-[0_0_15px_rgba(0,242,255,0.3)]">
+                    <label for="pfpFile" class="absolute bottom-1 right-1 bg-cyan-500 text-black w-9 h-9 rounded-full flex items-center justify-center cursor-pointer border-4 border-slate-950">
+                        <i class="fa-solid fa-camera text-xs"></i>
+                    </label>
+                    <input type="file" id="pfpFile" class="hidden" onchange="uploadToCloud(this, 'pfp')">
                 </div>
-                <div class="flex-1 flex flex-col">
-                    <div id="chatHeader" class="p-6 border-b border-black/5 font-black text-blue">Select a friend</div>
-                    <div id="chatBox" class="flex-1 overflow-y-auto p-8 flex flex-col"></div>
-                    <div id="chatInputArea" class="hidden p-6 border-t border-black/5 flex gap-3">
-                        <input id="chatIn" class="flex-1 bg-black/5 p-4 rounded-2xl outline-none" placeholder="Type message...">
-                        <button onclick="sendPrivateMsg()" class="bg-blue text-white px-8 rounded-2xl font-black">SEND</button>
-                    </div>
+                
+                <h2 id="profNameDisplay" class="text-2xl font-black tracking-tight text-white mb-1 uppercase">Loading...</h2>
+                <p id="profLocDisplay" class="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mb-6">Global Operative</p>
+                
+                <div class="space-y-3 pt-6 border-t border-white/5">
+                    <input id="editLoc" placeholder="Update Zone/Location" class="w-full p-3 text-xs outline-none">
+                    <textarea id="editBio" placeholder="Update Neural Bio..." class="w-full p-3 text-xs outline-none h-20"></textarea>
+                    <button onclick="saveProfile()" class="w-full btn-main py-3 text-xs">SYNC IDENTITY</button>
+                    <button onclick="logout()" class="w-full text-red-500 text-[10px] font-black tracking-widest pt-6 uppercase">Disconnect</button>
                 </div>
             </div>
         </section>
 
-        <div id="adminChatBox" class="glass rounded-3xl overflow-hidden flex shadow-2xl">
-            <div class="bg-blue p-4 text-white font-black text-[10px] flex justify-between"><span>SUPPORT</span><button onclick="toggleChat()">✕</button></div>
-            <div id="admDisplay" class="flex-1 overflow-y-auto p-4 flex flex-col"></div>
-            <div class="p-3 border-t flex gap-2">
-                <input id="admIn" class="flex-1 bg-black/5 p-2 rounded-xl text-xs outline-none" placeholder="Ask Admin...">
-                <button onclick="sendAdmMsg()" class="bg-blue text-white px-4 rounded-xl font-bold">SEND</button>
+        <div id="chatBox" class="fixed bottom-28 right-6 w-80 h-[400px] bg-slate-950 border border-cyan-400/30 rounded-[2rem] hidden flex-col overflow-hidden shadow-2xl z-50">
+            <div class="bg-cyan-400 p-4 text-black font-black text-[10px] flex justify-between">
+                <span>SYSTEM SUPPORT</span>
+                <button onclick="toggleChat()">✕</button>
+            </div>
+            <div id="chatDisplay" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2"></div>
+            <div class="p-4 border-t border-white/5 flex gap-2">
+                <input id="chatInput" class="flex-1 p-2 rounded-lg text-xs outline-none" placeholder="Message Admin...">
+                <button onclick="sendMsg()" class="text-cyan-400 px-2"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
-        <button onclick="toggleChat()" class="fixed bottom-6 right-6 bg-blue text-white w-14 h-14 rounded-full shadow-2xl z-50 flex items-center justify-center"><i class="fa-solid fa-headset text-xl"></i></button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -108,133 +126,123 @@
             apiKey: "AIzaSyD7pEnf4eAAtuFfvy4ff-zt1s239lOjQB4",
             authDomain: "nextdrop-21a5e.firebaseapp.com",
             projectId: "nextdrop-21a5e",
-            storageBucket: "nextdrop-21a5e.firebasestorage.app",
-            messagingSenderId: "315627368280",
-            appId: "1:315627368280:web:546d377a78463c3d8a7f2d",
             databaseURL: "https://nextdrop-21a5e-default-rtdb.firebaseio.com"
         };
         firebase.initializeApp(firebaseConfig);
         const rdb = firebase.database();
         let session = JSON.parse(localStorage.getItem('user_persistent')) || null;
-        let isLogin = true;
+        let isSignUpMode = false;
+        let lastUploadedUrl = "";
 
-        // AUTH LOGIC
-        function toggleAuth() { 
-            isLogin = !isLogin; 
-            document.getElementById('regFields').classList.toggle('hidden', isLogin);
-            document.getElementById('toggleBtn').innerText = isLogin ? "Create New Account" : "Back to Login";
+        // --- AUTH ---
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('signupFields').classList.toggle('hidden');
+            document.getElementById('authSub').innerText = isSignUpMode ? "Identity Creation" : "Welcome Back";
+            document.getElementById('mainAuthBtn').innerText = isSignUpMode ? "CREATE ACCOUNT" : "INITIALIZE";
+            document.getElementById('switchAuthBtn').innerHTML = isSignUpMode ? 'Already have an account? <span class="text-cyan-400">Login</span>' : 'New here? <span class="text-cyan-400">Create Account</span>';
         }
 
         function handleAuth() {
-            const email = document.getElementById('authEmail').value.trim().toLowerCase().replace(/\./g, ',');
-            const pass = document.getElementById('authPass').value.trim();
-            if(!email || !pass) return alert("Fill all fields");
-
-            if(isLogin) {
+            const email = document.getElementById('authEmail').value.toLowerCase().replace(/\./g, ',');
+            const pass = document.getElementById('authPass').value;
+            if(!email || !pass) return alert("Fill fields");
+            if(isSignUpMode) {
+                const name = document.getElementById('regName').value;
+                if(!name) return alert("Name required");
+                const u = { name, email, pass, pfp: `https://ui-avatars.com/api/?name=${name}&background=00f2ff&color=000`, loc: 'Unknown Zone', bio: 'NextDrop User' };
+                rdb.ref('users/'+email).set(u).then(() => { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); });
+            } else {
                 rdb.ref('users/'+email).once('value', s => {
                     const u = s.val();
-                    if(u && u.pass === pass) { 
-                        localStorage.setItem('user_persistent', JSON.stringify(u)); 
-                        location.reload(); 
-                    } else alert("Wrong credentials");
-                });
-            } else {
-                const name = document.getElementById('regName').value;
-                const u = { name, email, pass, pfp: "https://via.placeholder.com/150", loc: "Lagos", bio: "Available" };
-                rdb.ref('users/'+email).set(u).then(() => {
-                    localStorage.setItem('user_persistent', JSON.stringify(u));
-                    location.reload();
+                    if(u && u.pass === pass) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); }
+                    else alert("Access Denied");
                 });
             }
         }
 
-        // NAVIGATION & UI
-        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
-        function toggleChat() { const c = document.getElementById('adminChatBox'); c.style.display = (c.style.display === 'flex') ? 'none' : 'flex'; }
-        
-        // SLIDESHOW
-        let sPos = 0;
-        const slides = document.querySelectorAll('.slide');
-        if(slides.length) setInterval(() => { slides[sPos].classList.remove('active'); sPos = (sPos + 1) % slides.length; slides[sPos].classList.add('active'); }, 4000);
+        // --- UPLOAD ---
+        async function uploadToCloud(input, type) {
+            const file = input.files[0]; if(!file) return;
+            const formData = new FormData(); formData.append('image', file);
+            try {
+                const res = await fetch('https://api.imgbb.com/1/upload?key=67f6b0f15c7e3995f560c5a242f36d4f', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(data.success) {
+                    lastUploadedUrl = data.data.url;
+                    if(type === 'pfp') { 
+                        document.getElementById('profPfp').src = lastUploadedUrl; 
+                        alert("Photo Ready! Hit Sync to save.");
+                    }
+                }
+            } catch(e) { alert("Upload Failed"); }
+        }
 
-        // SYNC & MESSAGING
-        function initApp() {
-            if(!session) {
-                document.getElementById('authGate').classList.remove('hidden');
-                document.getElementById('mainApp').classList.add('hidden');
-                return;
+        // --- PROFILE ---
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'profile') {
+                const u = JSON.parse(localStorage.getItem('user_persistent'));
+                document.getElementById('profPfp').src = u.pfp;
+                document.getElementById('navPfp').src = u.pfp;
+                document.getElementById('profNameDisplay').innerText = u.name;
+                document.getElementById('profLocDisplay').innerText = u.loc || 'Global Operative';
+                document.getElementById('editLoc').value = u.loc || '';
+                document.getElementById('editBio').value = u.bio || '';
             }
-            document.getElementById('authGate').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        function saveProfile() {
+            const u = JSON.parse(localStorage.getItem('user_persistent'));
+            const loc = document.getElementById('editLoc').value;
+            const bio = document.getElementById('editBio').value;
+            const update = { ...u, pfp: lastUploadedUrl || u.pfp, loc, bio };
+            rdb.ref('users/'+u.email).update(update).then(() => {
+                localStorage.setItem('user_persistent', JSON.stringify(update));
+                alert("Identity Synced!");
+                showPage('profile');
+            });
+        }
+
+        // --- CORE ---
+        function initApp() {
+            if(!session) { document.getElementById('authGate').style.display = 'flex'; return; }
+            document.getElementById('mainApp').style.display = 'block';
             document.getElementById('navPfp').src = session.pfp;
 
-            // Online Status
-            const statusRef = rdb.ref(`status/${session.email}`);
-            rdb.ref('.info/connected').on('value', snap => {
-                if(snap.val()) {
-                    statusRef.onDisconnect().set({ state: 'offline' });
-                    statusRef.set({ state: 'online' });
+            rdb.ref('posts').on('value', s => {
+                const posts = Object.entries(s.val() || {});
+                document.getElementById('marketGrid').innerHTML = posts.map(([id, p]) => `
+                    <div class="item-card overflow-hidden">
+                        <img src="${p.img}" class="w-full h-48 object-cover">
+                        <div class="p-6 flex justify-between items-center">
+                            <div><h3 class="font-bold text-lg">${p.title}</h3></div>
+                            <button onclick="order('${p.title}')" class="bg-cyan-500 text-black px-5 py-2 rounded-xl text-xs font-black">ORDER</button>
+                        </div>
+                    </div>`).join('');
+                
+                const featured = posts.filter(([id, p]) => p.featured);
+                if(featured.length) {
+                    let cur = 0;
+                    const render = () => {
+                        const itm = featured[cur][1];
+                        document.getElementById('slideshow').innerHTML = `
+                        <div class="slide-item active flex items-end p-8 w-full h-full relative">
+                            <img src="${itm.img}" class="absolute inset-0 w-full h-full object-cover -z-10 opacity-50">
+                            <div><h2 class="text-2xl font-black mt-1">${itm.title}</h2></div>
+                        </div>`;
+                        cur = (cur + 1) % featured.length;
+                    };
+                    render(); setInterval(render, 4000);
                 }
             });
-
-            // Friends Sidebar
-            rdb.ref(`users/${session.email}/friends`).on('value', s => {
-                const sidebar = document.getElementById('sidebarFriends');
-                sidebar.innerHTML = '';
-                const friends = s.val() || {};
-                Object.keys(friends).forEach(fEmail => {
-                    rdb.ref('users/'+fEmail).once('value', us => {
-                        const u = us.val();
-                        rdb.ref('status/'+fEmail).on('value', ss => {
-                            const isOnline = ss.val()?.state === 'online';
-                            const div = document.createElement('div');
-                            div.className = "p-4 flex items-center gap-4 hover:bg-blue/5 cursor-pointer border-b border-black/5";
-                            div.onclick = () => startChat(fEmail, u.name);
-                            div.innerHTML = `<div class="relative"><img src="${u.pfp}" class="w-10 h-10 rounded-full object-cover">
-                                             <div class="absolute bottom-0 right-0 status-dot ${isOnline?'online':'offline'}"></div></div>
-                                             <p class="text-xs font-bold">${u.name}</p>`;
-                            sidebar.appendChild(div);
-                        });
-                    });
-                });
-            });
-
-            // Admin Chat Sync
-            rdb.ref(`admin_support/${session.email.replace(/,/g,'-')}`).on('value', s => {
-                const msgs = s.val() ? Object.values(s.val()) : [];
-                document.getElementById('admDisplay').innerHTML = msgs.map(m => `<div class="bubble ${m.sender===session.name?'sent':'received'}">${m.text}</div>`).join('');
-            });
         }
 
-        let activeChat = null;
-        function startChat(email, name) {
-            activeChat = email;
-            document.getElementById('chatHeader').innerText = "Chatting with " + name;
-            document.getElementById('chatInputArea').classList.remove('hidden');
-            const key = [session.email, email].sort().join('_').replace(/,/g,'');
-            rdb.ref(`chats/${key}`).on('value', s => {
-                const msgs = s.val() ? Object.values(s.val()) : [];
-                document.getElementById('chatBox').innerHTML = msgs.map(m => `<div class="bubble ${m.sender===session.email?'sent':'received'}">${m.text}</div>`).join('');
-                const d = document.getElementById('chatBox'); d.scrollTop = d.scrollHeight;
-            });
-        }
-
-        function sendPrivateMsg() {
-            const val = document.getElementById('chatIn').value;
-            if(!val || !activeChat) return;
-            const key = [session.email, activeChat].sort().join('_').replace(/,/g,'');
-            rdb.ref(`chats/${key}`).push({ sender: session.email, text: val });
-            document.getElementById('chatIn').value = '';
-        }
-
-        function sendAdmMsg() {
-            const val = document.getElementById('admIn').value;
-            if(!val) return;
-            rdb.ref(`admin_support/${session.email.replace(/,/g,'-')}`).push({ sender: session.name, text: val });
-            document.getElementById('admIn').value = '';
-        }
-
+        function order(t) { rdb.ref('orders/ORD-'+Date.now()).set({ item: t, user: session.email, status: 'pending' }); alert("Order Logged!"); }
+        function logout() { localStorage.clear(); location.reload(); }
+        function toggleChat() { document.getElementById('chatBox').classList.toggle('hidden'); }
+        
         initApp();
     </script>
 </body>
