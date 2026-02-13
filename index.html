@@ -3,107 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NextDrop | Active Logistics</title>
+    <title>NextDrop | Precision</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --neon: #00f2ff; --slate: #020617; }
-        body { background: var(--slate); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        
-        #authGate, #mainApp, #adminPortal { display: none; position: absolute; inset: 0; background: var(--slate); overflow-y: auto; z-index: 10; }
-        .page { display: none; animation: fadeIn 0.4s ease-out; padding-bottom: 120px; }
+        body { background: var(--slate); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; margin: 0; }
+        #adminPortal, #mainApp, #authGate { display: none; min-height: 100vh; }
+        .page { display: none; padding-bottom: 120px; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        input, textarea { background: rgba(255,255,255,0.07) !important; color: white !important; border-radius: 12px; border: none !important; }
-        .btn-main { background: var(--neon); color: black; font-weight: 800; border-radius: 1rem; transition: 0.2s; }
-        .item-card { background: rgba(30, 41, 59, 0.4); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.03); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Chat Bubbles */
-        .msg-user { align-self: flex-end; background: var(--neon); color: black; border-radius: 15px 15px 0 15px; }
-        .msg-admin { align-self: flex-start; background: #1e293b; color: white; border-radius: 15px 15px 15px 0; }
+        input, textarea { background: rgba(255,255,255,0.05) !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; width: 100%; padding: 14px; outline: none; }
+        .btn-neon { background: var(--neon); color: black; font-weight: 900; border-radius: 12px; transition: 0.2s; cursor: pointer; }
+        .nav-active { color: var(--neon) !important; text-shadow: 0 0 10px var(--neon); }
     </style>
 </head>
 <body>
 
-    <div id="authGate" class="flex items-center justify-center p-6 bg-slate-950">
-        <div class="max-w-md w-full text-center">
-            <h1 class="text-5xl font-black italic mb-10 tracking-tighter">NextDrop</h1>
-            <div class="bg-slate-900/50 p-8 rounded-[2.5rem] border border-white/5 space-y-4">
-                <div id="signupFields" class="hidden space-y-4">
-                    <input type="text" id="regName" placeholder="Full Name" class="w-full p-4 outline-none">
-                </div>
-                <input type="email" id="authEmail" placeholder="Email Address" class="w-full p-4 outline-none">
-                <input type="password" id="authPass" placeholder="Access Key" class="w-full p-4 outline-none">
-                <button onclick="handleAuth()" id="mainAuthBtn" class="w-full btn-main py-4">INITIALIZE</button>
-                <button onclick="toggleAuthMode()" id="switchAuthBtn" class="text-xs font-bold text-slate-400 mt-4">New here? <span class="text-cyan-400">Create Account</span></button>
-            </div>
+    <div id="authGate" class="flex flex-col items-center justify-center p-6">
+        <h1 class="text-5xl font-black italic mb-10 tracking-tighter">NextDrop</h1>
+        <div class="bg-slate-900 p-8 rounded-[2.5rem] w-full max-w-sm border border-white/5 space-y-4">
+            <input type="email" id="authEmail" placeholder="Email Address">
+            <input type="password" id="authPass" placeholder="Access Key">
+            <button onclick="handleAuth()" class="w-full btn-neon py-4 uppercase">Initialize</button>
         </div>
     </div>
 
     <div id="mainApp">
-        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-lg bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-full px-8 py-4 flex justify-between items-center shadow-2xl">
-            <button onclick="showPage('market')" class="text-cyan-400"><i class="fa-solid fa-store"></i></button>
-            <button onclick="showPage('orders')" class="text-slate-400"><i class="fa-solid fa-truck-fast"></i></button>
-            <button onclick="toggleChat()" class="text-slate-400"><i class="fa-solid fa-comment-dots"></i></button>
-            <button onclick="showPage('profile')" class="w-10 h-10 rounded-full border-2 border-cyan-400 overflow-hidden"><img id="navPfp" class="w-full h-full object-cover"></button>
+        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-full px-6 py-4 flex justify-between items-center shadow-2xl">
+            <button onclick="showPage('market')" id="nav-market" class="text-slate-400 text-xl"><i class="fa-solid fa-store"></i></button>
+            <button onclick="showPage('orders')" id="nav-orders" class="text-slate-400 text-xl"><i class="fa-solid fa-truck-fast"></i></button>
+            <button onclick="toggleChat()" class="text-slate-400 text-xl"><i class="fa-solid fa-comment-dots"></i></button>
+            <button onclick="showPage('profile')" id="nav-profile" class="w-10 h-10 rounded-full border-2 border-slate-700 overflow-hidden"><img id="navPfp" class="w-full h-full object-cover"></button>
         </nav>
 
-        <main id="market" class="page active pt-10 px-6 max-w-xl mx-auto">
-            <div id="slideshow" class="h-44 rounded-[2rem] bg-slate-900 mb-8 border border-white/5 overflow-hidden relative shadow-2xl flex items-center justify-center text-[10px] opacity-20 italic">Loading Market Intel...</div>
+        <main id="market" class="page active p-6 max-w-lg mx-auto">
+            <h2 class="text-2xl font-black mb-6">Marketplace</h2>
             <div id="marketGrid" class="space-y-6"></div>
         </main>
 
-        <section id="orders" class="page pt-10 px-6 max-w-xl mx-auto">
-            <h2 class="text-2xl font-black mb-6">Shipments</h2>
-            <div id="orderList" class="space-y-4"></div>
+        <section id="orders" class="page p-6 max-w-lg mx-auto">
+            <h2 class="text-2xl font-black mb-6">Your Shipments</h2>
+            <div id="userOrderList" class="space-y-4"></div>
         </section>
 
-        <section id="profile" class="page pt-10 px-6 max-w-md mx-auto">
-            <div class="bg-slate-900/80 p-8 rounded-[3rem] text-center shadow-2xl border border-white/5">
+        <section id="profile" class="page p-6 max-w-md mx-auto">
+            <div class="bg-slate-900 p-8 rounded-[3rem] text-center border border-white/5 shadow-2xl">
                 <div class="relative w-32 h-32 mx-auto mb-4">
                     <img id="profPfp" class="w-full h-full rounded-full object-cover border-4 border-cyan-400">
-                    <label for="pfpFile" class="absolute bottom-1 right-1 bg-cyan-500 text-black w-9 h-9 rounded-full flex items-center justify-center cursor-pointer border-4 border-slate-950"><i class="fa-solid fa-camera text-xs"></i></label>
-                    <input type="file" id="pfpFile" class="hidden" onchange="uploadToCloud(this, 'pfp')">
+                    <label class="absolute bottom-1 right-1 bg-cyan-500 text-black w-9 h-9 rounded-full flex items-center justify-center cursor-pointer border-4 border-slate-900">
+                        <input type="file" class="hidden" onchange="uploadFile(this, 'pfp')">
+                        <i class="fa-solid fa-camera text-xs"></i>
+                    </label>
                 </div>
-                <h2 id="profNameDisplay" class="text-2xl font-black text-white uppercase mb-1">...</h2>
-                <p id="profLocDisplay" class="text-[10px] text-cyan-400 font-bold uppercase mb-8 tracking-widest">Zone Unknown</p>
-                <div class="space-y-3 pt-6 border-t border-white/5">
-                    <input id="editLoc" placeholder="Update Location" class="w-full p-3 text-xs outline-none">
-                    <textarea id="editBio" placeholder="Update Bio..." class="w-full p-3 text-xs outline-none h-20"></textarea>
-                    <button onclick="saveProfile()" class="w-full btn-main py-3 text-xs">SYNC PROFILE</button>
-                    <button onclick="logout()" class="w-full text-red-500 text-[10px] font-black mt-4 uppercase">Terminate Session</button>
+                <h2 id="userName" class="text-2xl font-black uppercase mb-6 text-white">...</h2>
+                <div class="space-y-4">
+                    <input id="userLoc" placeholder="Location">
+                    <textarea id="userBio" placeholder="Bio description..." rows="3"></textarea>
+                    <button onclick="saveProfile()" id="saveProfileBtn" class="w-full btn-neon py-4 text-xs uppercase">Sync Changes</button>
+                    <button onclick="logout()" class="text-red-500 text-[10px] font-black uppercase mt-6 block mx-auto">Logout</button>
                 </div>
             </div>
         </section>
 
-        <div id="chatBox" class="fixed bottom-28 right-6 w-80 h-[450px] bg-slate-950 border border-cyan-400/30 rounded-[2rem] hidden flex-col overflow-hidden shadow-2xl z-50">
-            <div class="bg-cyan-400 p-4 text-black font-black text-xs flex justify-between items-center">
-                <span><i class="fa-solid fa-robot mr-2"></i>ADMIN SUPPORT</span>
-                <button onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></button>
+        <div id="chatBox" class="fixed inset-0 bg-slate-950 z-[60] hidden flex flex-col">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-slate-900">
+                <h3 class="font-black text-cyan-400">ADMIN_SUPPORT</h3>
+                <button onclick="toggleChat()" class="text-xl">✕</button>
             </div>
-            <div id="chatDisplay" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3"></div>
-            <div class="p-4 bg-slate-900 flex gap-2">
-                <input id="chatInput" class="flex-1 p-3 rounded-xl text-xs outline-none" placeholder="Type message...">
-                <button onclick="sendMessage()" class="bg-cyan-500 text-black w-10 h-10 rounded-xl"><i class="fa-solid fa-paper-plane"></i></button>
+            <div id="chatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4"></div>
+            <div class="p-6 bg-slate-900 flex gap-2">
+                <input id="chatInput" placeholder="Message Admin...">
+                <button onclick="sendMsg()" class="bg-cyan-500 text-black px-6 rounded-xl"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <div id="adminPortal" class="p-8">
-        <div class="flex justify-between mb-8"><h2 class="text-3xl font-black text-cyan-400 font-orbit">ADMIN_MODE</h2><button onclick="window.location.hash=''; location.reload()" class="opacity-40 text-xs">EXIT</button></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <div class="bg-slate-900 p-6 rounded-3xl border border-white/10">
-                <h3 class="text-xs font-bold mb-4 text-cyan-400 uppercase">Publish Market Item</h3>
-                <label class="block border-2 border-dashed border-white/10 p-6 rounded-2xl text-center mb-4 cursor-pointer">
-                    <input type="file" class="hidden" onchange="uploadToCloud(this, 'post')">
-                    <span id="uploadStatusText">Upload Image</span>
+    <div id="adminPortal" class="p-8 max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-black text-cyan-400 italic">ADMIN_CONTROL</h1>
+            <button onclick="window.location.hash=''; location.reload()" class="bg-red-500/10 text-red-500 px-4 py-2 rounded-lg text-xs font-bold">EXIT</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-slate-900 p-6 rounded-3xl border border-white/5">
+                <h3 class="text-xs font-bold text-cyan-400 uppercase mb-4">Post Goods</h3>
+                <label class="block border-2 border-dashed border-white/10 p-10 rounded-2xl text-center mb-4 cursor-pointer">
+                    <input type="file" class="hidden" onchange="uploadFile(this, 'market')">
+                    <span id="admUploadStatus" class="text-[10px] opacity-40">UPLOAD IMAGE</span>
                 </label>
-                <input id="postTitle" placeholder="Item Name" class="w-full p-3 mb-3 outline-none">
-                <button onclick="createPost()" class="w-full btn-main py-3">POST ITEM</button>
+                <input id="postTitle" placeholder="Item Name" class="mb-3">
+                <textarea id="postDesc" placeholder="Price/Details" class="mb-4"></textarea>
+                <button onclick="adminPost()" class="w-full btn-neon py-4 uppercase text-xs">Post to Market</button>
             </div>
-            <div id="admOrderList" class="bg-slate-900 p-6 rounded-3xl border border-white/10 space-y-3"></div>
+            <div class="bg-slate-900 p-6 rounded-3xl border border-white/5">
+                <h3 class="text-xs font-bold text-cyan-400 uppercase mb-4">Active Orders</h3>
+                <div id="admOrders" class="space-y-3"></div>
+            </div>
+            <div class="bg-slate-900 p-6 rounded-3xl border border-white/5">
+                <h3 class="text-xs font-bold text-cyan-400 uppercase mb-4">Customer Chats</h3>
+                <div id="admInbox" class="space-y-3"></div>
+            </div>
         </div>
     </div>
 
@@ -119,119 +120,171 @@
         firebase.initializeApp(firebaseConfig);
         const rdb = firebase.database();
         let session = JSON.parse(localStorage.getItem('user_persistent')) || null;
-        let lastUploadedUrl = "";
+        let tempImg = "";
 
-        // --- AUTH & INITIALIZATION ---
-        function checkGlobalAccess() {
+        function checkMode() {
             if(window.location.hash === "#open-sesame") {
                 document.getElementById('adminPortal').style.display = 'block';
-                loadAdmin(); return;
+                loadAdmin();
+            } else if(!session) {
+                document.getElementById('authGate').style.display = 'flex';
+            } else {
+                document.getElementById('mainApp').style.display = 'block';
+                initUserApp();
             }
-            if(!session) { document.getElementById('authGate').style.display = 'flex'; }
-            else { initApp(); }
         }
 
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            document.getElementById('signupFields').classList.toggle('hidden');
-            document.getElementById('mainAuthBtn').innerText = isSignUpMode ? "CREATE ACCOUNT" : "INITIALIZE";
-        }
-
-        function handleAuth() {
-            const email = document.getElementById('authEmail').value.toLowerCase().replace(/\./g, ',');
-            const pass = document.getElementById('authPass').value;
-            rdb.ref('users/'+email).once('value', s => {
-                const u = s.val();
-                if(u && u.pass === pass) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); }
-                else alert("Unauthorized Access");
-            });
-        }
-
-        // --- ACTIVE APP LOGIC ---
-        function initApp() {
-            document.getElementById('mainApp').style.display = 'block';
+        async function uploadFile(input, mode) {
+            const file = input.files[0]; if(!file) return;
+            const status = (mode === 'market') ? document.getElementById('admUploadStatus') : document.getElementById('saveProfileBtn');
+            const originalText = status.innerText;
+            status.innerText = "UPLOADING...";
             
-            // Listen for user data updates (Profile Active)
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const res = await fetch('https://api.imgbb.com/1/upload?key=67f6b0f15c7e3995f560c5a242f36d4f', {
+                    method: 'POST', body: formData
+                });
+                const data = await res.json();
+                if(data.success) {
+                    tempImg = data.data.url;
+                    status.innerText = "UPLOAD READY ✅";
+                    if(mode === 'pfp') document.getElementById('profPfp').src = tempImg;
+                }
+            } catch(e) { 
+                alert("Upload Failed"); 
+                status.innerText = originalText;
+            }
+        }
+
+        function initUserApp() {
+            // Live Profile listener
             rdb.ref('users/'+session.email).on('value', s => {
                 const u = s.val();
                 if(!u) return;
-                document.getElementById('navPfp').src = u.pfp;
-                document.getElementById('profPfp').src = u.pfp;
-                document.getElementById('profNameDisplay').innerText = u.name;
-                document.getElementById('profLocDisplay').innerText = u.loc || 'Global Operative';
+                document.getElementById('navPfp').src = u.pfp || "";
+                document.getElementById('profPfp').src = u.pfp || "";
+                document.getElementById('userName').innerText = u.name;
+                document.getElementById('userLoc').value = u.loc || "";
+                document.getElementById('userBio').value = u.bio || "";
             });
 
-            // Listen for Market items
+            // Market Grid
             rdb.ref('posts').on('value', s => {
-                const posts = Object.entries(s.val() || {});
-                document.getElementById('marketGrid').innerHTML = posts.map(([id, p]) => `
-                    <div class="item-card overflow-hidden">
-                        <img src="${p.img}" class="w-full h-48 object-cover">
-                        <div class="p-6 flex justify-between items-center">
-                            <h3 class="font-bold text-lg">${p.title}</h3>
-                            <button onclick="order('${p.title}')" class="bg-cyan-500 text-black px-5 py-2 rounded-xl text-xs font-black">ORDER</button>
-                        </div>
-                    </div>`).join('');
+                const grid = document.getElementById('marketGrid'); grid.innerHTML = "";
+                Object.entries(s.val() || {}).forEach(([id, p]) => {
+                    grid.innerHTML += `
+                        <div class="bg-slate-900 rounded-[2rem] overflow-hidden border border-white/5 shadow-xl">
+                            <img src="${p.img}" class="w-full h-52 object-cover">
+                            <div class="p-6">
+                                <h3 class="font-bold text-lg">${p.title}</h3>
+                                <p class="text-[11px] opacity-40 mb-4">${p.desc}</p>
+                                <button onclick="buy('${id}', '${p.title}')" class="w-full btn-neon py-3 text-xs uppercase">Acquire</button>
+                            </div>
+                        </div>`;
+                });
             });
 
-            // Listen for Chat (Chat Box Active)
+            // User Order Monitor
+            rdb.ref('orders').on('value', s => {
+                const list = document.getElementById('userOrderList'); list.innerHTML = "";
+                Object.entries(s.val() || {}).forEach(([id, o]) => {
+                    if(o.user === session.email) {
+                        list.innerHTML += `
+                            <div class="bg-slate-900 p-5 rounded-2xl border border-white/5 flex justify-between items-center">
+                                <div><p class="font-bold text-sm">${o.item}</p><p class="text-[9px] opacity-40 italic">ID: ${id}</p></div>
+                                <span class="text-[9px] font-black px-3 py-1 rounded bg-cyan-400 text-black uppercase">${o.status}</span>
+                            </div>`;
+                    }
+                });
+            });
+
+            // Chat Display
             rdb.ref('chats/'+session.email).on('value', s => {
-                const data = s.val() || {};
                 const display = document.getElementById('chatDisplay');
-                display.innerHTML = Object.values(data).map(m => `
-                    <div class="p-3 text-xs max-w-[80%] ${m.sender === 'user' ? 'msg-user' : 'msg-admin'}">
-                        ${m.text}
-                    </div>
-                `).join('');
+                display.innerHTML = Object.values(s.val() || {}).map(m => 
+                    `<div class="p-3 text-xs rounded-2xl max-w-[80%] ${m.sender === 'admin' ? 'bg-slate-800 self-start' : 'bg-cyan-500 text-black self-end'}">${m.text}</div>`
+                ).join('');
                 display.scrollTop = display.scrollHeight;
             });
         }
 
-        // --- CHAT FUNCTIONS ---
-        function toggleChat() { document.getElementById('chatBox').classList.toggle('hidden'); }
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            if(!input.value) return;
-            rdb.ref('chats/'+session.email).push({
-                sender: 'user',
-                text: input.value,
-                timestamp: Date.now()
-            });
-            input.value = '';
-        }
-
-        // --- PROFILE FUNCTIONS ---
-        async function uploadToCloud(input, type) {
-            const file = input.files[0]; if(!file) return;
-            const formData = new FormData(); formData.append('image', file);
-            const res = await fetch('https://api.imgbb.com/1/upload?key=67f6b0f15c7e3995f560c5a242f36d4f', { method: 'POST', body: formData });
-            const data = await res.json();
-            if(data.success) {
-                lastUploadedUrl = data.data.url;
-                if(type === 'pfp') { document.getElementById('profPfp').src = lastUploadedUrl; }
-                else { document.getElementById('uploadStatusText').innerText = "SUCCESS ✅"; }
-            }
+        function buy(id, title) {
+            rdb.ref('orders/ORD-'+Date.now()).set({ user: session.email, item: title, status: 'pending' })
+            .then(() => alert("Order logged in Shipments!"));
         }
 
         function saveProfile() {
-            const loc = document.getElementById('editLoc').value;
-            const bio = document.getElementById('editBio').value;
-            rdb.ref('users/'+session.email).update({
-                pfp: lastUploadedUrl || session.pfp,
-                loc: loc || session.loc,
-                bio: bio || session.bio
-            }).then(() => alert("Profile Synced"));
+            const update = { loc: document.getElementById('userLoc').value, bio: document.getElementById('userBio').value };
+            if(tempImg) update.pfp = tempImg;
+            rdb.ref('users/'+session.email).update(update).then(() => {
+                alert("Profile Updated!");
+                tempImg = "";
+            });
+        }
+
+        function adminPost() {
+            const t = document.getElementById('postTitle').value;
+            const d = document.getElementById('postDesc').value;
+            if(!tempImg || !t) return alert("Fill all fields");
+            rdb.ref('posts').push({ title: t, desc: d, img: tempImg }).then(() => location.reload());
+        }
+
+        function loadAdmin() {
+            rdb.ref('orders').on('value', s => {
+                const list = document.getElementById('admOrders'); list.innerHTML = "";
+                Object.entries(s.val() || {}).forEach(([id, o]) => {
+                    list.innerHTML += `<div class="p-3 bg-white/5 rounded-xl flex justify-between items-center">
+                        <span class="text-[9px]">${o.item}</span>
+                        <button onclick="rdb.ref('orders/${id}/status').set('shipped')" class="text-cyan-400 text-[10px] font-black">SHIP</button>
+                    </div>`;
+                });
+            });
+            rdb.ref('chats').on('value', s => {
+                const list = document.getElementById('admInbox'); list.innerHTML = "";
+                Object.entries(s.val() || {}).forEach(([email, msgs]) => {
+                    const last = Object.values(msgs).pop();
+                    list.innerHTML += `<div class="p-3 bg-white/5 rounded-xl">
+                        <p class="text-[8px] text-cyan-400">${email}</p>
+                        <p class="text-xs">${last.text}</p>
+                        <button onclick="adminReply('${email}')" class="text-[10px] text-white mt-1">Reply</button>
+                    </div>`;
+                });
+            });
+        }
+
+        function adminReply(email) {
+            const val = prompt("Enter reply:");
+            if(val) rdb.ref('chats/'+email).push({ sender: 'admin', text: val });
+        }
+
+        function handleAuth() {
+            const e = document.getElementById('authEmail').value.toLowerCase().replace(/\./g, ',');
+            const p = document.getElementById('authPass').value;
+            rdb.ref('users/'+e).once('value', s => {
+                const u = s.val();
+                if(u && u.pass === p) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); }
+                else alert("Denied");
+            });
+        }
+
+        function sendMsg() {
+            const i = document.getElementById('chatInput'); if(!i.value) return;
+            rdb.ref('chats/'+session.email).push({ sender: 'user', text: i.value }); i.value = "";
         }
 
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
             document.getElementById(id).classList.add('active');
+            document.getElementById('nav-'+id).classList.add('nav-active');
         }
 
-        function order(t) { rdb.ref('orders/ORD-'+Date.now()).set({ item: t, user: session.email, status: 'pending' }); alert("Order Dispatched!"); }
+        function toggleChat() { document.getElementById('chatBox').classList.toggle('hidden'); }
         function logout() { localStorage.clear(); location.reload(); }
-
-        checkGlobalAccess();
+        checkMode();
     </script>
 </body>
 </html>
