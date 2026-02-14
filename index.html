@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NextDrop | Fixed</title>
+    <title>NextDrop | Unified</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +11,6 @@
         :root { --brand: #2563eb; --dark: #0f172a; }
         body { background: #ffffff; color: var(--dark); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
         
-        /* Layout Fixes */
         #mainApp { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         .page-container { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
@@ -20,22 +19,18 @@
         #mainApp, #adminPortal { display: none; }
         .nd-input { background: #1e293b; border: 1px solid #334155; border-radius: 18px; padding: 18px; color: white; outline: none; width: 100%; }
 
-        /* Branding */
         .nd-logo { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.8rem; letter-spacing: -1.5px; }
         .nd-logo span { color: #2563eb; }
 
-        /* Jumia Style Horizontal Scroll */
         .market-scroller { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px; padding: 10px 20px; }
         .market-scroller::-webkit-scrollbar { display: none; }
         .item-card { flex: 0 0 85%; scroll-snap-align: center; background: white; border-radius: 2.5rem; border: 1px solid #f1f5f9; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
 
-        /* Navigation */
         .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         .nav-active { color: #2563eb !important; transform: scale(1.1); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Shipment Tracker dots */
         .step { position: relative; padding-left: 30px; margin-bottom: 20px; border-left: 2px solid #e2e8f0; }
         .step.active { border-left-color: #2563eb; }
         .step-dot { position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: #e2e8f0; border-radius: 50%; }
@@ -51,13 +46,13 @@
             <input type="text" id="regName" placeholder="Full Name" class="nd-input hidden">
             <input type="email" id="authEmail" placeholder="Campus Email" class="nd-input">
             <input type="password" id="authPass" placeholder="Access Key" class="nd-input">
-            <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#38bdf8] text-[#0f172a] py-5 rounded-2xl font-black uppercase text-sm border-none shadow-lg">Sign In</button>
-            <button onclick="toggleAuthMode()" id="toggleBtn" class="w-full text-slate-400 text-xs font-bold bg-transparent border-none mt-4">New here? Create Account</button>
+            <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#38bdf8] text-[#0f172a] py-5 rounded-2xl font-black uppercase text-sm border-none">Sign In</button>
+            <button onclick="toggleAuthMode()" id="toggleBtn" class="w-full text-slate-400 text-xs font-bold bg-transparent border-none mt-4">Create Account</button>
         </div>
     </div>
 
     <div id="mainApp">
-        <header class="p-6 flex justify-between items-center bg-white/90 backdrop-blur-md z-[100]">
+        <header class="p-6 flex justify-between items-center bg-white/90 backdrop-blur-md">
             <div class="nd-logo !text-slate-900 !text-xl">NEXT<span>DROP</span></div>
             <button onclick="toggleCart()" class="relative p-2 bg-slate-50 rounded-xl border-none">
                 <i class="fa-solid fa-cart-shopping text-xl text-slate-700"></i>
@@ -85,55 +80,66 @@
                             <i class="fa-solid fa-camera text-xs"></i>
                         </label>
                     </div>
-                    <h3 id="userNameDisplay" class="font-bold text-xl mb-8 text-slate-800">...</h3>
-                    
+                    <h3 id="userNameDisplay" class="font-bold text-xl mb-8">...</h3>
                     <div class="w-full space-y-4">
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Location</label>
-                            <input id="userLoc" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border border-slate-100">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Student Bio</label>
-                            <textarea id="userBio" class="w-full p-4 bg-slate-50 rounded-2xl outline-none h-24 border border-slate-100"></textarea>
-                        </div>
-                        <button onclick="saveProfile()" id="syncBtn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold shadow-md">Save Profile</button>
-                        
-                        <div class="pt-10">
-                            <button onclick="logout()" class="w-full text-red-500 font-black py-4 border-2 border-red-50 rounded-2xl uppercase text-xs tracking-widest">Logout Account</button>
-                        </div>
+                        <input id="userLoc" placeholder="Location" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none">
+                        <textarea id="userBio" placeholder="Bio" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none h-24"></textarea>
+                        <button onclick="saveProfile()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold">Save Profile</button>
+                        <button onclick="logout()" class="w-full text-red-500 font-black py-4 uppercase text-xs">Logout</button>
                     </div>
                 </div>
             </section>
         </div>
 
-        <nav class="bg-white border-t px-8 py-6 flex justify-between items-center rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <nav class="bg-white border-t px-8 py-6 flex justify-between items-center rounded-t-[2.5rem] shadow-lg">
             <button onclick="showPage('market')" id="nav-market" class="text-slate-300 text-2xl nav-active bg-transparent border-none"><i class="fa-solid fa-store"></i></button>
             <button onclick="showPage('orders')" id="nav-orders" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-receipt"></i></button>
             <button onclick="toggleChat()" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-paper-plane"></i></button>
-            <button onclick="showPage('profile')" id="nav-profile" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-user-astronaut"></i></button>
+            <button onclick="showPage('profile')" id="nav-profile" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-user"></i></button>
         </nav>
+    </div>
 
-        <div id="chatBox" class="fixed inset-0 bg-white z-[400] hidden flex flex-col">
-            <div class="p-6 border-b flex justify-between items-center">
-                <h3 class="font-bold text-blue-600 uppercase tracking-tighter">Support Terminal</h3>
-                <button onclick="toggleChat()" class="text-xl bg-slate-100 w-10 h-10 rounded-full border-none">✕</button>
+    <div id="adminPortal" class="p-6 bg-slate-50 min-h-screen overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div class="nd-logo">ND<span>_ADMIN</span></div>
+            <button onclick="window.location.hash=''; location.reload()" class="bg-slate-200 px-4 py-2 rounded-lg font-bold text-xs border-none">EXIT</button>
+        </div>
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">New Post</h3>
+                <label class="block border-2 border-dashed border-slate-100 p-8 rounded-2xl text-center cursor-pointer mb-4">
+                    <input type="file" class="hidden" onchange="uploadImage(this, 'market')">
+                    <span id="admUpStatus" class="text-xs text-slate-400">UPLOAD IMAGE</span>
+                </label>
+                <input id="postTitle" placeholder="Item Name" class="w-full p-4 bg-slate-50 rounded-xl mb-2 outline-none border-none">
+                <textarea id="postDesc" placeholder="Price/Details" class="w-full p-4 bg-slate-50 rounded-xl h-20 mb-4 outline-none border-none"></textarea>
+                <button onclick="adminPost()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold">Publish</button>
             </div>
-            <div id="chatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-slate-50"></div>
-            <div class="p-4 flex gap-2 pb-10">
-                <input id="chatInput" placeholder="Message admin..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none border-none">
-                <button onclick="sendMsg()" class="bg-blue-600 text-white px-6 rounded-2xl border-none"><i class="fa-solid fa-paper-plane"></i></button>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Active Orders</h3>
+                <div id="admOrderList" class="space-y-2"></div>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Students</h3>
+                <div id="admUserList" class="space-y-2"></div>
             </div>
         </div>
+    </div>
 
-        <div id="cartDrawer" class="fixed inset-0 bg-black/40 z-[300] hidden backdrop-blur-sm">
-            <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[3rem] p-8 max-h-[85vh] flex flex-col">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-bold">Your Cart</h3>
-                    <button onclick="toggleCart()" class="text-2xl border-none bg-transparent">✕</button>
-                </div>
-                <div id="cartList" class="flex-1 overflow-y-auto space-y-4 mb-6"></div>
-                <button onclick="checkout()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold">Complete Order</button>
-            </div>
+    <div id="chatBox" class="fixed inset-0 bg-white z-[400] hidden flex flex-col">
+        <div class="p-6 border-b flex justify-between items-center"><h3 class="font-bold text-blue-600">Support</h3><button onclick="toggleChat()" class="text-xl border-none">✕</button></div>
+        <div id="chatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-slate-50"></div>
+        <div class="p-4 flex gap-2 pb-10">
+            <input id="chatInput" placeholder="Write..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none border-none">
+            <button onclick="sendMsg()" class="bg-blue-600 text-white px-6 rounded-2xl border-none"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div id="cartDrawer" class="fixed inset-0 bg-black/40 z-[300] hidden backdrop-blur-sm">
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[3rem] p-8 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold">Cart</h3><button onclick="toggleCart()" class="text-2xl border-none">✕</button></div>
+            <div id="cartList" class="flex-1 overflow-y-auto space-y-4 mb-6"></div>
+            <button onclick="checkout()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold">Checkout</button>
         </div>
     </div>
 
@@ -149,11 +155,14 @@
         firebase.initializeApp(firebaseConfig);
         const rdb = firebase.database();
         let session = JSON.parse(localStorage.getItem('user_persistent')) || null;
-        let authMode = 'login';
-        let cart = [];
+        let authMode = 'login', cart = [], tempImg = "";
 
         function boot() {
-            if(session) {
+            if(window.location.hash === "#open-sesame") {
+                document.getElementById('authGate').style.display = 'none';
+                document.getElementById('adminPortal').style.display = 'block';
+                loadAdmin();
+            } else if(session) {
                 document.getElementById('authGate').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'flex';
                 initUserApp();
@@ -164,69 +173,46 @@
             authMode = authMode === 'login' ? 'signup' : 'login';
             document.getElementById('regName').classList.toggle('hidden', authMode === 'login');
             document.getElementById('authBtn').innerText = authMode === 'login' ? 'Sign In' : 'Create Account';
-            document.getElementById('toggleBtn').innerText = authMode === 'login' ? 'New here? Create Account' : 'Back to Sign In';
+            document.getElementById('toggleBtn').innerText = authMode === 'login' ? 'Create Account' : 'Sign In';
         }
 
         function handleAuth() {
-            const name = document.getElementById('regName').value;
+            const name = document.getElementById('regName').value, pass = document.getElementById('authPass').value;
             const email = document.getElementById('authEmail').value.toLowerCase().replace(/\./g, ',');
-            const pass = document.getElementById('authPass').value;
-            if(!email || !pass) return alert("Fill fields");
-
             if(authMode === 'signup') {
                 rdb.ref('users/'+email).set({ name, email, pass, pfp: '', loc: '', bio: '' }).then(() => location.reload());
             } else {
                 rdb.ref('users/'+email).once('value', s => {
                     const u = s.val();
-                    if(u && u.pass === pass) {
-                        localStorage.setItem('user_persistent', JSON.stringify(u));
-                        location.reload();
-                    } else alert("Denied");
+                    if(u && u.pass === pass) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); } else alert("Denied");
                 });
             }
         }
 
         function initUserApp() {
             rdb.ref('users/'+session.email).on('value', s => {
-                const u = s.val();
+                const u = s.val(); if(!u) return;
                 document.getElementById('userNameDisplay').innerText = u.name;
                 document.getElementById('profPfp').src = u.pfp || "https://via.placeholder.com/150";
                 document.getElementById('userLoc').value = u.loc || "";
                 document.getElementById('userBio').value = u.bio || "";
             });
-
             rdb.ref('posts').on('value', s => {
                 const grid = document.getElementById('marketGrid'); grid.innerHTML = "";
                 Object.entries(s.val() || {}).forEach(([id, p]) => {
-                    grid.innerHTML += `<div class="item-card overflow-hidden">
-                        <img src="${p.img}" class="w-full h-80 object-cover">
-                        <div class="p-8">
-                            <h3 class="text-xl font-bold">${p.title}</h3>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-6">${p.desc}</p>
-                            <button onclick="addToCart('${id}', '${p.title}', '${p.img}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold uppercase text-xs">Add To Cart</button>
-                        </div>
-                    </div>`;
+                    grid.innerHTML += `<div class="item-card overflow-hidden"><img src="${p.img}" class="w-full h-80 object-cover"><div class="p-8"><h3 class="text-xl font-bold">${p.title}</h3><p class="text-xs text-slate-400 mb-6">${p.desc}</p><button onclick="addToCart('${id}', '${p.title}', '${p.img}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold">Add To Cart</button></div></div>`;
                 });
             });
-
             rdb.ref('orders').orderByChild('email').equalTo(session.email).on('value', s => {
                 const list = document.getElementById('trackerList'); list.innerHTML = "";
                 Object.entries(s.val() || {}).forEach(([id, o]) => {
                     const st = o.status || 'pending';
-                    list.innerHTML += `<div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                        <p class="text-[10px] font-bold text-blue-600 mb-4 uppercase">ORDER: ${id.substring(1,8)}</p>
-                        <div class="step active"><div class="step-dot"></div><p class="text-xs font-bold">Confirmed</p></div>
-                        <div class="step ${['shipped','delivered'].includes(st)?'active':''}"><div class="step-dot"></div><p class="text-xs font-bold">In Transit</p></div>
-                        <div class="step ${st==='delivered'?'active':''}" style="border:0; margin:0"><div class="step-dot"></div><p class="text-xs font-bold">Dropped</p></div>
-                    </div>`;
+                    list.innerHTML += `<div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-100"><p class="text-[10px] font-bold text-blue-600 mb-4">ORDER: ${id.substring(1,8)}</p><div class="step active"><div class="step-dot"></div><p class="text-xs font-bold">Confirmed</p></div><div class="step ${['shipped','delivered'].includes(st)?'active':''}"><div class="step-dot"></div><p class="text-xs font-bold">In Transit</p></div><div class="step ${st==='delivered'?'active':''}" style="border:0; margin:0"><div class="step-dot"></div><p class="text-xs font-bold">Delivered</p></div></div>`;
                 });
             });
-
             rdb.ref('chats/'+session.email).on('value', s => {
                 const d = document.getElementById('chatDisplay');
-                d.innerHTML = Object.values(s.val() || {}).map(m => `
-                    <div class="p-4 text-sm rounded-2xl max-w-[85%] ${m.sender === 'admin' ? 'bg-white shadow-sm text-slate-800 self-start' : 'bg-blue-600 text-white self-end'}">${m.text}</div>
-                `).join('');
+                d.innerHTML = Object.values(s.val() || {}).map(m => `<div class="p-4 text-sm rounded-2xl max-w-[85%] ${m.sender === 'admin' ? 'bg-white text-slate-800 self-start' : 'bg-blue-600 text-white self-end'}">${m.text}</div>`).join('');
                 d.scrollTop = d.scrollHeight;
             });
         }
@@ -236,54 +222,44 @@
             const fd = new FormData(); fd.append('image', file);
             const res = await fetch('https://api.imgbb.com/1/upload?key=67f6b0f15c7e3995f560c5a242f36d4f', { method: 'POST', body: fd });
             const data = await res.json();
-            if(data.success && mode === 'pfp') {
-                rdb.ref('users/'+session.email).update({ pfp: data.data.url });
+            if(data.success) {
+                if(mode === 'pfp') rdb.ref('users/'+session.email).update({ pfp: data.data.url });
+                else { tempImg = data.data.url; document.getElementById('admUpStatus').innerText = "READY"; }
             }
         }
 
-        function addToCart(id, title, img) {
-            cart.push({id, title, img});
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const count = document.getElementById('cartCount');
-            count.innerText = cart.length; count.classList.toggle('hidden', cart.length === 0);
-            const list = document.getElementById('cartList');
-            list.innerHTML = cart.map((item, i) => `
-                <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl">
-                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
-                    <span class="flex-1 font-bold text-sm">${item.title}</span>
-                    <button onclick="cart.splice(${i},1); updateCartUI();" class="text-red-400 bg-transparent border-none">✕</button>
-                </div>`).join('');
-        }
-
-        function checkout() {
-            if(cart.length === 0) return;
-            rdb.ref('orders').push({ user: session.name, email: session.email, items: cart, status: 'pending' }).then(() => {
-                alert("Order Placed!"); cart = []; updateCartUI(); toggleCart(); showPage('orders');
+        function loadAdmin() {
+            rdb.ref('users').on('value', s => {
+                const l = document.getElementById('admUserList'); l.innerHTML = "";
+                Object.entries(s.val()||{}).forEach(([k,u]) => { l.innerHTML += `<div class="p-2 bg-slate-100 rounded-lg text-[10px] flex justify-between"><span>${u.name}</span><button onclick="rdb.ref('users/${k}').remove()" class="text-red-400 border-none">DEL</button></div>`; });
+            });
+            rdb.ref('orders').on('value', s => {
+                const l = document.getElementById('admOrderList'); l.innerHTML = "";
+                Object.entries(s.val()||{}).forEach(([id,o]) => {
+                    l.innerHTML += `<div class="p-2 bg-slate-100 rounded-lg text-[10px] flex flex-col gap-2"><b>${o.user}</b><select onchange="rdb.ref('orders/${id}').update({status: this.value})"><option value="pending" ${o.status==='pending'?'selected':''}>PENDING</option><option value="shipped" ${o.status==='shipped'?'selected':''}>SHIPPED</option><option value="delivered" ${o.status==='delivered'?'selected':''}>DELIVERED</option></select></div>`;
+                });
             });
         }
 
+        function adminPost() {
+            const t = document.getElementById('postTitle').value, d = document.getElementById('postDesc').value;
+            if(t && tempImg) rdb.ref('posts').push({ title: t, desc: d, img: tempImg }).then(() => location.reload());
+        }
+
+        function addToCart(id, title, img) { cart.push({id, title, img}); updateCartUI(); }
+        function updateCartUI() {
+            const count = document.getElementById('cartCount'); count.innerText = cart.length; count.classList.toggle('hidden', cart.length === 0);
+            document.getElementById('cartList').innerHTML = cart.map((item, i) => `<div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl"><img src="${item.img}" class="w-12 h-12 rounded-lg object-cover"><span class="flex-1 font-bold text-sm">${item.title}</span><button onclick="cart.splice(${i},1); updateCartUI();" class="text-red-400 border-none">✕</button></div>`).join('');
+        }
+        function checkout() { rdb.ref('orders').push({ user: session.name, email: session.email, items: cart, status: 'pending' }).then(() => { cart = []; updateCartUI(); toggleCart(); showPage('orders'); }); }
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('nav-'+id).classList.add('nav-active');
         }
-
-        function sendMsg() {
-            const i = document.getElementById('chatInput');
-            if(i.value) { rdb.ref('chats/'+session.email).push({ sender: 'user', text: i.value }); i.value = ""; }
-        }
-
-        function saveProfile() {
-            rdb.ref('users/'+session.email).update({ 
-                loc: document.getElementById('userLoc').value, 
-                bio: document.getElementById('userBio').value 
-            }).then(() => alert("Saved"));
-        }
-
+        function sendMsg() { const i = document.getElementById('chatInput'); if(i.value) { rdb.ref('chats/'+session.email).push({ sender: 'user', text: i.value }); i.value = ""; } }
+        function saveProfile() { rdb.ref('users/'+session.email).update({ loc: document.getElementById('userLoc').value, bio: document.getElementById('userBio').value }).then(() => alert("Saved")); }
         function toggleCart() { document.getElementById('cartDrawer').classList.toggle('hidden'); }
         function toggleChat() { document.getElementById('chatBox').classList.toggle('hidden'); }
         function logout() { localStorage.clear(); location.reload(); }
