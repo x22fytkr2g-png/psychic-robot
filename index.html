@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NextDrop | Unified</title>
+    <title>NextDrop | God Mode Broadcast</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,7 +12,7 @@
         body { background: #ffffff; color: var(--dark); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
         
         #mainApp { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .page-container { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .page-container { flex: 1; overflow-y: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         
         /* Auth Screen */
         #authGate { position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
@@ -22,31 +22,27 @@
         .nd-logo { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.8rem; letter-spacing: -1.5px; }
         .nd-logo span { color: #2563eb; }
 
-        .market-scroller { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px; padding: 10px 20px; }
-        .market-scroller::-webkit-scrollbar { display: none; }
-        .item-card { flex: 0 0 85%; scroll-snap-align: center; background: white; border-radius: 2.5rem; border: 1px solid #f1f5f9; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .market-grid { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 20px; }
+        .item-card { background: white; border-radius: 2rem; border: 1px solid #f1f5f9; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
 
         .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         .nav-active { color: #2563eb !important; transform: scale(1.1); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .step { position: relative; padding-left: 30px; margin-bottom: 20px; border-left: 2px solid #e2e8f0; }
-        .step.active { border-left-color: #2563eb; }
-        .step-dot { position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: #e2e8f0; border-radius: 50%; }
-        .step.active .step-dot { background: #2563eb; box-shadow: 0 0 8px rgba(37, 99, 235, 0.4); }
+        .admin-card { background: white; border-radius: 1.5rem; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
 
     <div id="authGate">
         <div class="nd-logo text-white text-4xl mb-2">NEXT<span>DROP</span></div>
-        <p id="authSub" class="text-slate-400 text-xs mb-8 uppercase tracking-widest">Student Portal Access</p>
+        <p id="authSub" class="text-slate-400 text-xs mb-8 uppercase tracking-widest text-center">Student Portal Access</p>
         <div class="w-full max-w-xs space-y-3">
             <input type="text" id="regName" placeholder="Full Name" class="nd-input hidden">
             <input type="email" id="authEmail" placeholder="Campus Email" class="nd-input">
             <input type="password" id="authPass" placeholder="Access Key" class="nd-input">
-            <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#38bdf8] text-[#0f172a] py-5 rounded-2xl font-black uppercase text-sm border-none">Sign In</button>
+            <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#38bdf8] text-[#0f172a] py-5 rounded-2xl font-black uppercase text-sm border-none shadow-xl">Sign In</button>
             <button onclick="toggleAuthMode()" id="toggleBtn" class="w-full text-slate-400 text-xs font-bold bg-transparent border-none mt-4">Create Account</button>
         </div>
     </div>
@@ -62,8 +58,8 @@
 
         <div class="page-container">
             <main id="market" class="page active">
-                <div class="px-6 py-4"><h2 class="text-2xl font-black">Featured Items</h2></div>
-                <div id="marketGrid" class="market-scroller"></div>
+                <div class="px-6 py-2"><h2 class="text-2xl font-black">All Goods</h2></div>
+                <div id="marketGrid" class="market-grid"></div>
             </main>
 
             <section id="orders" class="page px-6 pt-4">
@@ -85,7 +81,7 @@
                         <input id="userLoc" placeholder="Location" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none">
                         <textarea id="userBio" placeholder="Bio" class="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none h-24"></textarea>
                         <button onclick="saveProfile()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold">Save Profile</button>
-                        <button onclick="logout()" class="w-full text-red-500 font-black py-4 uppercase text-xs">Logout</button>
+                        <button onclick="logout()" class="w-full text-red-500 font-black py-4 uppercase text-xs">Logout Account</button>
                     </div>
                 </div>
             </section>
@@ -95,51 +91,62 @@
             <button onclick="showPage('market')" id="nav-market" class="text-slate-300 text-2xl nav-active bg-transparent border-none"><i class="fa-solid fa-store"></i></button>
             <button onclick="showPage('orders')" id="nav-orders" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-receipt"></i></button>
             <button onclick="toggleChat()" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-paper-plane"></i></button>
-            <button onclick="showPage('profile')" id="nav-profile" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-user"></i></button>
+            <button onclick="showPage('profile')" id="nav-profile" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-circle-user"></i></button>
         </nav>
     </div>
 
-    <div id="adminPortal" class="p-6 bg-slate-50 min-h-screen overflow-y-auto">
-        <div class="flex justify-between items-center mb-8">
-            <div class="nd-logo">ND<span>_ADMIN</span></div>
-            <button onclick="window.location.hash=''; location.reload()" class="bg-slate-200 px-4 py-2 rounded-lg font-bold text-xs border-none">EXIT</button>
+    <div id="adminPortal" class="p-6 bg-slate-100 min-screen overflow-y-auto">
+        <div class="flex justify-between items-center mb-10 sticky top-0 bg-slate-100/80 backdrop-blur-md py-4 z-50">
+            <div class="nd-logo">ND<span>_GOD_MODE</span></div>
+            <button onclick="window.location.hash=''; location.reload()" class="bg-black text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Exit</button>
         </div>
-        <div class="space-y-6">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm">
-                <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">New Post</h3>
-                <label class="block border-2 border-dashed border-slate-100 p-8 rounded-2xl text-center cursor-pointer mb-4">
+
+        <div class="space-y-8 pb-20">
+            <div class="admin-card !bg-blue-600 text-white">
+                <h3 class="text-xs font-black mb-4 tracking-widest uppercase">Global Broadcast (All Students)</h3>
+                <textarea id="bcMsg" placeholder="Send message to everyone..." class="w-full p-4 bg-white/10 border border-white/20 rounded-xl mb-4 h-20 text-white placeholder:text-white/50 outline-none"></textarea>
+                <button onclick="globalBroadcast()" class="w-full bg-white text-blue-600 py-3 rounded-xl font-black uppercase text-xs shadow-xl">Send Shout</button>
+            </div>
+
+            <div class="admin-card">
+                <h3 class="text-xs font-black text-slate-400 mb-4 tracking-widest uppercase text-center">New Drop Entry</h3>
+                <label class="block border-2 border-dashed border-slate-200 p-8 rounded-2xl text-center cursor-pointer mb-4">
                     <input type="file" class="hidden" onchange="uploadImage(this, 'market')">
-                    <span id="admUpStatus" class="text-xs text-slate-400">UPLOAD IMAGE</span>
+                    <span id="admUpStatus" class="text-xs font-bold text-blue-500">UPLOAD PRODUCT IMAGE</span>
                 </label>
-                <input id="postTitle" placeholder="Item Name" class="w-full p-4 bg-slate-50 rounded-xl mb-2 outline-none border-none">
-                <textarea id="postDesc" placeholder="Price/Details" class="w-full p-4 bg-slate-50 rounded-xl h-20 mb-4 outline-none border-none"></textarea>
-                <button onclick="adminPost()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold">Publish</button>
+                <input id="postTitle" placeholder="Product Title" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl mb-2">
+                <textarea id="postDesc" placeholder="Details/Price" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl mb-4 h-20"></textarea>
+                <button onclick="adminPost()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold">Launch Drop</button>
             </div>
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm">
-                <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Active Orders</h3>
-                <div id="admOrderList" class="space-y-2"></div>
+
+            <div class="admin-card">
+                <h3 class="text-xs font-black text-slate-400 mb-4 tracking-widest uppercase">Live Orders</h3>
+                <div id="admOrderList" class="space-y-4"></div>
             </div>
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm">
-                <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase">Students</h3>
+
+            <div class="admin-card">
+                <h3 class="text-xs font-black text-slate-400 mb-4 tracking-widest uppercase">Active Marketplace (Delete)</h3>
+                <div id="admPostList" class="grid grid-cols-2 gap-2"></div>
+            </div>
+
+            <div class="admin-card">
+                <h3 class="text-xs font-black text-slate-400 mb-4 tracking-widest uppercase">Student Database (Keys)</h3>
                 <div id="admUserList" class="space-y-2"></div>
             </div>
         </div>
     </div>
 
     <div id="chatBox" class="fixed inset-0 bg-white z-[400] hidden flex flex-col">
-        <div class="p-6 border-b flex justify-between items-center"><h3 class="font-bold text-blue-600">Support</h3><button onclick="toggleChat()" class="text-xl border-none">✕</button></div>
+        <div class="p-6 border-b flex justify-between items-center"><h3 class="font-bold text-blue-600">Support Terminal</h3><button onclick="toggleChat()" class="text-xl">✕</button></div>
         <div id="chatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-slate-50"></div>
-        <div class="p-4 flex gap-2 pb-10">
-            <input id="chatInput" placeholder="Write..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none border-none">
-            <button onclick="sendMsg()" class="bg-blue-600 text-white px-6 rounded-2xl border-none"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
+        <div class="p-4 flex gap-2 pb-10"><input id="chatInput" placeholder="Message..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none"><button onclick="sendMsg()" class="bg-blue-600 text-white px-6 rounded-2xl"><i class="fa-solid fa-paper-plane"></i></button></div>
     </div>
 
     <div id="cartDrawer" class="fixed inset-0 bg-black/40 z-[300] hidden backdrop-blur-sm">
         <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[3rem] p-8 max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold">Cart</h3><button onclick="toggleCart()" class="text-2xl border-none">✕</button></div>
+            <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold">Cart</h3><button onclick="toggleCart()" class="text-2xl">✕</button></div>
             <div id="cartList" class="flex-1 overflow-y-auto space-y-4 mb-6"></div>
-            <button onclick="checkout()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold">Checkout</button>
+            <button onclick="checkout()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase text-xs">Confirm Order</button>
         </div>
     </div>
 
@@ -173,7 +180,7 @@
             authMode = authMode === 'login' ? 'signup' : 'login';
             document.getElementById('regName').classList.toggle('hidden', authMode === 'login');
             document.getElementById('authBtn').innerText = authMode === 'login' ? 'Sign In' : 'Create Account';
-            document.getElementById('toggleBtn').innerText = authMode === 'login' ? 'Create Account' : 'Sign In';
+            document.getElementById('toggleBtn').innerText = authMode === 'login' ? 'New here? Register' : 'Back to Login';
         }
 
         function handleAuth() {
@@ -184,7 +191,7 @@
             } else {
                 rdb.ref('users/'+email).once('value', s => {
                     const u = s.val();
-                    if(u && u.pass === pass) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); } else alert("Denied");
+                    if(u && u.pass === pass) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); } else alert("Access Denied");
                 });
             }
         }
@@ -200,19 +207,19 @@
             rdb.ref('posts').on('value', s => {
                 const grid = document.getElementById('marketGrid'); grid.innerHTML = "";
                 Object.entries(s.val() || {}).forEach(([id, p]) => {
-                    grid.innerHTML += `<div class="item-card overflow-hidden"><img src="${p.img}" class="w-full h-80 object-cover"><div class="p-8"><h3 class="text-xl font-bold">${p.title}</h3><p class="text-xs text-slate-400 mb-6">${p.desc}</p><button onclick="addToCart('${id}', '${p.title}', '${p.img}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold">Add To Cart</button></div></div>`;
+                    grid.innerHTML += `<div class="item-card"><img src="${p.img}" class="w-full h-72 object-cover"><div class="p-6"><h3 class="text-xl font-bold">${p.title}</h3><p class="text-xs text-slate-400 mb-6">${p.desc}</p><button onclick="addToCart('${id}', '${p.title}', '${p.img}')" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-xs uppercase">Add to Cart</button></div></div>`;
                 });
             });
             rdb.ref('orders').orderByChild('email').equalTo(session.email).on('value', s => {
                 const list = document.getElementById('trackerList'); list.innerHTML = "";
                 Object.entries(s.val() || {}).forEach(([id, o]) => {
                     const st = o.status || 'pending';
-                    list.innerHTML += `<div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-100"><p class="text-[10px] font-bold text-blue-600 mb-4">ORDER: ${id.substring(1,8)}</p><div class="step active"><div class="step-dot"></div><p class="text-xs font-bold">Confirmed</p></div><div class="step ${['shipped','delivered'].includes(st)?'active':''}"><div class="step-dot"></div><p class="text-xs font-bold">In Transit</p></div><div class="step ${st==='delivered'?'active':''}" style="border:0; margin:0"><div class="step-dot"></div><p class="text-xs font-bold">Delivered</p></div></div>`;
+                    list.innerHTML += `<div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-100"><p class="text-[10px] font-bold text-blue-600 mb-4">ORDER: ${id.substring(1,8)}</p><div class="flex flex-col gap-4"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-600"></div><p class="text-xs font-bold">Confirmed</p></div><div class="flex items-center gap-2 ${['shipped','delivered'].includes(st)?'text-blue-600':'text-slate-300'} text-xs font-bold"><div class="w-3 h-3 rounded-full bg-current"></div>In Transit</div><div class="flex items-center gap-2 ${st==='delivered'?'text-blue-600':'text-slate-300'} text-xs font-bold"><div class="w-3 h-3 rounded-full bg-current"></div>Delivered</div></div></div>`;
                 });
             });
             rdb.ref('chats/'+session.email).on('value', s => {
                 const d = document.getElementById('chatDisplay');
-                d.innerHTML = Object.values(s.val() || {}).map(m => `<div class="p-4 text-sm rounded-2xl max-w-[85%] ${m.sender === 'admin' ? 'bg-white text-slate-800 self-start' : 'bg-blue-600 text-white self-end'}">${m.text}</div>`).join('');
+                d.innerHTML = Object.values(s.val() || {}).map(m => `<div class="p-4 text-sm rounded-2xl max-w-[85%] ${m.sender === 'admin' ? 'bg-white text-slate-800 self-start shadow-sm' : 'bg-blue-600 text-white self-end'}">${m.text}</div>`).join('');
                 d.scrollTop = d.scrollHeight;
             });
         }
@@ -224,32 +231,53 @@
             const data = await res.json();
             if(data.success) {
                 if(mode === 'pfp') rdb.ref('users/'+session.email).update({ pfp: data.data.url });
-                else { tempImg = data.data.url; document.getElementById('admUpStatus').innerText = "READY"; }
+                else { tempImg = data.data.url; document.getElementById('admUpStatus').innerText = "✅ IMAGE LOADED"; }
             }
         }
 
         function loadAdmin() {
             rdb.ref('users').on('value', s => {
                 const l = document.getElementById('admUserList'); l.innerHTML = "";
-                Object.entries(s.val()||{}).forEach(([k,u]) => { l.innerHTML += `<div class="p-2 bg-slate-100 rounded-lg text-[10px] flex justify-between"><span>${u.name}</span><button onclick="rdb.ref('users/${k}').remove()" class="text-red-400 border-none">DEL</button></div>`; });
+                Object.entries(s.val()||{}).forEach(([k,u]) => { 
+                    l.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border flex justify-between items-center"><div class="flex flex-col"><b class="text-xs">${u.name}</b><span class="text-[9px] font-bold text-red-500 uppercase">Key: ${u.pass}</span></div><button onclick="rdb.ref('users/${k}').remove()" class="text-red-500 text-[10px] font-bold">DEL</button></div>`; 
+                });
             });
             rdb.ref('orders').on('value', s => {
                 const l = document.getElementById('admOrderList'); l.innerHTML = "";
                 Object.entries(s.val()||{}).forEach(([id,o]) => {
-                    l.innerHTML += `<div class="p-2 bg-slate-100 rounded-lg text-[10px] flex flex-col gap-2"><b>${o.user}</b><select onchange="rdb.ref('orders/${id}').update({status: this.value})"><option value="pending" ${o.status==='pending'?'selected':''}>PENDING</option><option value="shipped" ${o.status==='shipped'?'selected':''}>SHIPPED</option><option value="delivered" ${o.status==='delivered'?'selected':''}>DELIVERED</option></select></div>`;
+                    let itemsHtml = (o.items || []).map(i => `<div class="flex items-center gap-2 mt-1"><img src="${i.img}" class="w-5 h-5 rounded"> <span class="text-[9px]">${i.title}</span></div>`).join('');
+                    l.innerHTML += `<div class="p-4 bg-slate-50 border rounded-2xl"><div class="flex justify-between"><div class="flex flex-col"><b class="text-xs text-blue-600">${o.user}</b></div><select class="text-[9px] p-1 border rounded" onchange="rdb.ref('orders/${id}').update({status: this.value})"><option value="pending" ${o.status==='pending'?'selected':''}>PENDING</option><option value="shipped" ${o.status==='shipped'?'selected':''}>SHIPPED</option><option value="delivered" ${o.status==='delivered'?'selected':''}>DELIVERED</option></select></div><div class="mt-2 border-t pt-2">${itemsHtml}</div></div>`;
                 });
+            });
+            rdb.ref('posts').on('value', s => {
+                const l = document.getElementById('admPostList'); l.innerHTML = "";
+                Object.entries(s.val()||{}).forEach(([id,p]) => {
+                    l.innerHTML += `<div class="bg-slate-50 rounded-lg p-2 border relative"><img src="${p.img}" class="w-full h-20 object-cover rounded mb-2"><p class="text-[9px] font-bold truncate">${p.title}</p><button onclick="rdb.ref('posts/${id}').remove()" class="absolute top-1 right-1 bg-red-500 text-white w-5 h-5 rounded-full text-[10px]">✕</button></div>`;
+                });
+            });
+        }
+
+        function globalBroadcast() {
+            const msg = document.getElementById('bcMsg').value;
+            if(!msg) return;
+            rdb.ref('users').once('value', s => {
+                const users = s.val();
+                Object.keys(users).forEach(emailKey => {
+                    rdb.ref('chats/'+emailKey).push({ sender: 'admin', text: `📢 BROADCAST: ${msg}` });
+                });
+                alert("Broadcast Sent!"); document.getElementById('bcMsg').value = "";
             });
         }
 
         function adminPost() {
             const t = document.getElementById('postTitle').value, d = document.getElementById('postDesc').value;
-            if(t && tempImg) rdb.ref('posts').push({ title: t, desc: d, img: tempImg }).then(() => location.reload());
+            if(t && tempImg) rdb.ref('posts').push({ title: t, desc: d, img: tempImg }).then(() => { alert("Post Added"); tempImg = ""; location.reload(); });
         }
 
         function addToCart(id, title, img) { cart.push({id, title, img}); updateCartUI(); }
         function updateCartUI() {
             const count = document.getElementById('cartCount'); count.innerText = cart.length; count.classList.toggle('hidden', cart.length === 0);
-            document.getElementById('cartList').innerHTML = cart.map((item, i) => `<div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl"><img src="${item.img}" class="w-12 h-12 rounded-lg object-cover"><span class="flex-1 font-bold text-sm">${item.title}</span><button onclick="cart.splice(${i},1); updateCartUI();" class="text-red-400 border-none">✕</button></div>`).join('');
+            document.getElementById('cartList').innerHTML = cart.map((item, i) => `<div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl"><img src="${item.img}" class="w-12 h-12 rounded-lg object-cover"><span class="flex-1 font-bold text-sm">${item.title}</span><button onclick="cart.splice(${i},1); updateCartUI();" class="text-red-400">✕</button></div>`).join('');
         }
         function checkout() { rdb.ref('orders').push({ user: session.name, email: session.email, items: cart, status: 'pending' }).then(() => { cart = []; updateCartUI(); toggleCart(); showPage('orders'); }); }
         function showPage(id) {
@@ -267,3 +295,4 @@
     </script>
 </body>
 </html>
+
