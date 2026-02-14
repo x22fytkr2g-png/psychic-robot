@@ -3,126 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NextDrop | Student Marketplace</title>
+    <title>NextDrop | Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --neon: #00f2ff; --slate: #020617; }
-        body { background: var(--slate); color: white; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
-        #adminPortal, #mainApp, #authGate { display: none; min-height: 100vh; }
+        :root { --brand: #2563eb; --dark: #0f172a; }
+        body { background: #ffffff; color: var(--dark); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
         
-        .page { display: none; padding-bottom: 140px; opacity: 0; transform: translateY(10px); transition: all 0.4s ease; }
-        .page.active { display: block; opacity: 1; transform: translateY(0); }
+        /* Layout Fixes */
+        #mainApp { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        .page-container { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
-        .market-snap { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px; padding: 10px 0; -webkit-overflow-scrolling: touch; }
-        .market-snap::-webkit-scrollbar { display: none; }
-        .card-snap { flex: 0 0 85%; scroll-snap-align: center; background: rgba(30, 41, 59, 0.5); border-radius: 2.5rem; border: 1px solid rgba(255,255,255,0.05); }
+        /* Auth Screen */
+        #authGate { position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #mainApp, #adminPortal { display: none; }
+        .nd-input { background: #1e293b; border: 1px solid #334155; border-radius: 18px; padding: 18px; color: white; outline: none; width: 100%; }
 
-        .logo-text { font-family: 'Orbitron', sans-serif; letter-spacing: -1px; }
-        .nav-active { color: var(--neon) !important; filter: drop-shadow(0 0 8px var(--neon)); }
-        .btn-neon { background: var(--neon); color: black; font-weight: 800; border-radius: 16px; transition: 0.3s; }
-        .btn-neon:active { transform: scale(0.95); }
-        
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        /* Branding */
+        .nd-logo { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.8rem; letter-spacing: -1.5px; }
+        .nd-logo span { color: #2563eb; }
+
+        /* Jumia Style Horizontal Scroll */
+        .market-scroller { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px; padding: 10px 20px; }
+        .market-scroller::-webkit-scrollbar { display: none; }
+        .item-card { flex: 0 0 85%; scroll-snap-align: center; background: white; border-radius: 2.5rem; border: 1px solid #f1f5f9; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+
+        /* Navigation */
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        .nav-active { color: #2563eb !important; transform: scale(1.1); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Shipment Tracker dots */
+        .step { position: relative; padding-left: 30px; margin-bottom: 20px; border-left: 2px solid #e2e8f0; }
+        .step.active { border-left-color: #2563eb; }
+        .step-dot { position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: #e2e8f0; border-radius: 50%; }
+        .step.active .step-dot { background: #2563eb; box-shadow: 0 0 8px rgba(37, 99, 235, 0.4); }
     </style>
 </head>
 <body>
 
-    <div id="authGate" class="flex flex-col items-center justify-center p-6 bg-slate-950">
-        <h1 class="logo-text text-5xl font-black text-cyan-400 italic mb-10">NEXTDROP</h1>
-        <div class="glass p-8 rounded-[3rem] w-full max-w-sm space-y-4">
-            <input type="email" id="authEmail" placeholder="Student Email" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-white outline-none">
-            <input type="password" id="authPass" placeholder="Access Key" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-white outline-none">
-            <button onclick="handleAuth()" class="w-full btn-neon py-4 uppercase">Initialize</button>
+    <div id="authGate">
+        <div class="nd-logo text-white text-4xl mb-2">NEXT<span>DROP</span></div>
+        <p id="authSub" class="text-slate-400 text-xs mb-8 uppercase tracking-widest">Student Portal Access</p>
+        <div class="w-full max-w-xs space-y-3">
+            <input type="text" id="regName" placeholder="Full Name" class="nd-input hidden">
+            <input type="email" id="authEmail" placeholder="Campus Email" class="nd-input">
+            <input type="password" id="authPass" placeholder="Access Key" class="nd-input">
+            <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#38bdf8] text-[#0f172a] py-5 rounded-2xl font-black uppercase text-sm border-none shadow-lg">Sign In</button>
+            <button onclick="toggleAuthMode()" id="toggleBtn" class="w-full text-slate-400 text-xs font-bold bg-transparent border-none mt-4">New here? Create Account</button>
         </div>
     </div>
 
     <div id="mainApp">
-        <header class="p-6 flex justify-between items-center sticky top-0 z-[100] glass border-0 rounded-b-[2.5rem]">
-            <h1 class="logo-text text-2xl font-black italic text-cyan-400">NEXTDROP</h1>
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
+        <header class="p-6 flex justify-between items-center bg-white/90 backdrop-blur-md z-[100]">
+            <div class="nd-logo !text-slate-900 !text-xl">NEXT<span>DROP</span></div>
+            <button onclick="toggleCart()" class="relative p-2 bg-slate-50 rounded-xl border-none">
+                <i class="fa-solid fa-cart-shopping text-xl text-slate-700"></i>
+                <span id="cartCount" class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+            </button>
         </header>
 
-        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-md glass rounded-full px-8 py-5 flex justify-between items-center shadow-2xl">
-            <button onclick="showPage('market')" id="nav-market" class="text-slate-400 text-2xl"><i class="fa-solid fa-graduation-cap"></i></button>
-            <button onclick="showPage('orders')" id="nav-orders" class="text-slate-400 text-2xl"><i class="fa-solid fa-bolt"></i></button>
-            <button onclick="toggleChat()" class="text-slate-400 text-2xl"><i class="fa-solid fa-comment-dots"></i></button>
-            <button onclick="showPage('profile')" id="nav-profile" class="w-10 h-10 rounded-full border-2 border-slate-700 overflow-hidden"><img id="navPfp" class="w-full h-full object-cover"></button>
+        <div class="page-container">
+            <main id="market" class="page active">
+                <div class="px-6 py-4"><h2 class="text-2xl font-black">Featured Items</h2></div>
+                <div id="marketGrid" class="market-scroller"></div>
+            </main>
+
+            <section id="orders" class="page px-6 pt-4">
+                <h2 class="text-2xl font-black mb-6 italic tracking-tight">SHIPMENT_TRACKER</h2>
+                <div id="trackerList" class="space-y-4"></div>
+            </section>
+
+            <section id="profile" class="page px-6 pt-4 pb-32">
+                <div class="flex flex-col items-center">
+                    <div class="relative mb-6">
+                        <img id="profPfp" class="w-32 h-32 rounded-full object-cover border-4 border-slate-50 shadow-xl bg-slate-100">
+                        <label class="absolute bottom-0 right-0 bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center border-4 border-white cursor-pointer">
+                            <input type="file" class="hidden" onchange="uploadImage(this, 'pfp')">
+                            <i class="fa-solid fa-camera text-xs"></i>
+                        </label>
+                    </div>
+                    <h3 id="userNameDisplay" class="font-bold text-xl mb-8 text-slate-800">...</h3>
+                    
+                    <div class="w-full space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Location</label>
+                            <input id="userLoc" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border border-slate-100">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 ml-2 uppercase">Student Bio</label>
+                            <textarea id="userBio" class="w-full p-4 bg-slate-50 rounded-2xl outline-none h-24 border border-slate-100"></textarea>
+                        </div>
+                        <button onclick="saveProfile()" id="syncBtn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold shadow-md">Save Profile</button>
+                        
+                        <div class="pt-10">
+                            <button onclick="logout()" class="w-full text-red-500 font-black py-4 border-2 border-red-50 rounded-2xl uppercase text-xs tracking-widest">Logout Account</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <nav class="bg-white border-t px-8 py-6 flex justify-between items-center rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+            <button onclick="showPage('market')" id="nav-market" class="text-slate-300 text-2xl nav-active bg-transparent border-none"><i class="fa-solid fa-store"></i></button>
+            <button onclick="showPage('orders')" id="nav-orders" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-receipt"></i></button>
+            <button onclick="toggleChat()" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-paper-plane"></i></button>
+            <button onclick="showPage('profile')" id="nav-profile" class="text-slate-300 text-2xl bg-transparent border-none"><i class="fa-solid fa-user-astronaut"></i></button>
         </nav>
 
-        <main id="market" class="page active p-5">
-            <div class="flex justify-between items-end mb-6 px-2">
-                <h2 class="text-xl font-black uppercase italic tracking-tighter text-white">Campus_Exchange</h2>
-                <span class="text-[8px] font-bold opacity-30 uppercase tracking-[0.2em]">ECL Project</span>
+        <div id="chatBox" class="fixed inset-0 bg-white z-[400] hidden flex flex-col">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h3 class="font-bold text-blue-600 uppercase tracking-tighter">Support Terminal</h3>
+                <button onclick="toggleChat()" class="text-xl bg-slate-100 w-10 h-10 rounded-full border-none">✕</button>
             </div>
-            <div id="marketGrid" class="market-snap"></div>
-        </main>
-
-        <section id="profile" class="page p-6">
-            <div class="flex justify-between items-center mb-8 glass p-5 rounded-[2rem]">
-                <div>
-                    <span class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Student Identity</span>
-                    <h2 id="userNameDisplay" class="text-2xl font-black uppercase tracking-tighter">...</h2>
-                </div>
-                <button onclick="logout()" class="w-12 h-12 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-power-off"></i>
-                </button>
-            </div>
-
-            <div class="flex flex-col items-center">
-                <div class="relative w-40 h-40 mb-8">
-                    <img id="profPfp" class="w-full h-full rounded-full object-cover border-4 border-cyan-400 bg-slate-800">
-                    <label class="absolute bottom-1 right-1 bg-cyan-500 text-black w-10 h-10 rounded-full flex items-center justify-center border-4 border-slate-950 cursor-pointer">
-                        <input type="file" class="hidden" onchange="uploadImage(this, 'pfp')">
-                        <i class="fa-solid fa-camera"></i>
-                    </label>
-                </div>
-                
-                <div class="w-full space-y-4">
-                    <div class="glass p-5 rounded-3xl">
-                        <p class="text-[9px] font-black text-cyan-400 uppercase mb-2">Campus Zone</p>
-                        <input id="userLoc" class="bg-transparent w-full outline-none font-bold">
-                    </div>
-                    <div class="glass p-5 rounded-3xl">
-                        <p class="text-[9px] font-black text-cyan-400 uppercase mb-2">Student Bio</p>
-                        <textarea id="userBio" class="bg-transparent w-full outline-none h-24 font-medium"></textarea>
-                    </div>
-                    <button onclick="saveProfile()" id="syncBtn" class="w-full btn-neon py-5 uppercase text-xs tracking-widest">Update Session</button>
-                </div>
-            </div>
-        </section>
-
-        <div id="chatBox" class="fixed inset-0 bg-slate-950 z-[300] hidden flex flex-col">
-            <div class="p-6 glass flex justify-between items-center rounded-b-[2.5rem]">
-                <h3 class="font-black text-cyan-400 italic">SECURE_COMMS</h3>
-                <button onclick="toggleChat()" class="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-xl">✕</button>
-            </div>
-            <div id="chatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4"></div>
-            <div class="p-5 glass flex gap-3 pb-12 rounded-t-[2.5rem]">
-                <input id="chatInput" placeholder="Write message..." class="flex-1 p-5 bg-white/5 rounded-2xl outline-none">
-                <button onclick="sendMsg()" class="bg-cyan-500 text-black w-16 rounded-2xl flex items-center justify-center text-xl shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
+            <div id="chatDisplay" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-slate-50"></div>
+            <div class="p-4 flex gap-2 pb-10">
+                <input id="chatInput" placeholder="Message admin..." class="flex-1 p-4 bg-slate-100 rounded-2xl outline-none border-none">
+                <button onclick="sendMsg()" class="bg-blue-600 text-white px-6 rounded-2xl border-none"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
-    </div>
 
-    <div id="adminPortal" class="p-6 max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="logo-text text-3xl font-black text-cyan-400 italic">ADMIN_CTRL</h1>
-            <button onclick="window.location.hash=''; location.reload()" class="bg-red-500 text-white px-5 py-2 rounded-xl text-xs font-bold uppercase">Exit</button>
+        <div id="cartDrawer" class="fixed inset-0 bg-black/40 z-[300] hidden backdrop-blur-sm">
+            <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[3rem] p-8 max-h-[85vh] flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">Your Cart</h3>
+                    <button onclick="toggleCart()" class="text-2xl border-none bg-transparent">✕</button>
+                </div>
+                <div id="cartList" class="flex-1 overflow-y-auto space-y-4 mb-6"></div>
+                <button onclick="checkout()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold">Complete Order</button>
+            </div>
         </div>
-        
-        <div class="glass p-8 rounded-[3rem] space-y-4">
-            <h3 class="text-xs font-black text-cyan-400 uppercase tracking-widest mb-2">Create New Drop</h3>
-            <label class="block border-2 border-dashed border-white/10 p-12 rounded-3xl text-center cursor-pointer hover:border-cyan-400/40 transition-all">
-                <input type="file" class="hidden" onchange="uploadImage(this, 'market')">
-                <span id="admUpStatus" class="text-[11px] font-black opacity-30 uppercase">Add Listing Photo (Optional)</span>
-            </label>
-            <input id="postTitle" placeholder="Item Name" class="w-full p-4 bg-white/5 rounded-xl outline-none">
-            <textarea id="postDesc" placeholder="Price and Details" class="w-full p-4 bg-white/5 rounded-xl outline-none h-24 text-sm"></textarea>
-            <button onclick="adminPost()" id="postBtn" class="w-full btn-neon py-4 uppercase text-xs">Publish Instantly</button>
-        </div>
-        <div id="admUserList" class="space-y-3 mt-10"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -137,130 +149,142 @@
         firebase.initializeApp(firebaseConfig);
         const rdb = firebase.database();
         let session = JSON.parse(localStorage.getItem('user_persistent')) || null;
-        let tempImg = "";
+        let authMode = 'login';
+        let cart = [];
 
         function boot() {
-            if(window.location.hash === "#open-sesame") {
-                document.getElementById('adminPortal').style.display = 'block';
-                loadAdmin();
-            } else if(!session) {
-                document.getElementById('authGate').style.display = 'flex';
-            } else {
-                document.getElementById('mainApp').style.display = 'block';
+            if(session) {
+                document.getElementById('authGate').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'flex';
                 initUserApp();
             }
         }
 
-        async function uploadImage(input, mode) {
-            const file = input.files[0]; if(!file) return;
-            const status = (mode === 'market') ? document.getElementById('admUpStatus') : document.getElementById('syncBtn');
-            status.innerText = "Syncing...";
-            
-            const formData = new FormData();
-            formData.append('image', file);
-            
-            try {
-                const res = await fetch('https://api.imgbb.com/1/upload?key=67f6b0f15c7e3995f560c5a242f36d4f', {
-                    method: 'POST', body: formData
+        function toggleAuthMode() {
+            authMode = authMode === 'login' ? 'signup' : 'login';
+            document.getElementById('regName').classList.toggle('hidden', authMode === 'login');
+            document.getElementById('authBtn').innerText = authMode === 'login' ? 'Sign In' : 'Create Account';
+            document.getElementById('toggleBtn').innerText = authMode === 'login' ? 'New here? Create Account' : 'Back to Sign In';
+        }
+
+        function handleAuth() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('authEmail').value.toLowerCase().replace(/\./g, ',');
+            const pass = document.getElementById('authPass').value;
+            if(!email || !pass) return alert("Fill fields");
+
+            if(authMode === 'signup') {
+                rdb.ref('users/'+email).set({ name, email, pass, pfp: '', loc: '', bio: '' }).then(() => location.reload());
+            } else {
+                rdb.ref('users/'+email).once('value', s => {
+                    const u = s.val();
+                    if(u && u.pass === pass) {
+                        localStorage.setItem('user_persistent', JSON.stringify(u));
+                        location.reload();
+                    } else alert("Denied");
                 });
-                const data = await res.json();
-                if(data.success) {
-                    tempImg = data.data.url;
-                    status.innerText = "Verified ✅";
-                    if(mode === 'pfp') {
-                        document.getElementById('profPfp').src = tempImg;
-                        rdb.ref('users/'+session.email).update({pfp: tempImg});
-                    }
-                }
-            } catch(e) { status.innerText = "Retry"; }
+            }
         }
 
         function initUserApp() {
             rdb.ref('users/'+session.email).on('value', s => {
-                const u = s.val(); if(!u) return;
-                document.getElementById('navPfp').src = u.pfp || "";
-                document.getElementById('profPfp').src = u.pfp || "";
+                const u = s.val();
                 document.getElementById('userNameDisplay').innerText = u.name;
+                document.getElementById('profPfp').src = u.pfp || "https://via.placeholder.com/150";
                 document.getElementById('userLoc').value = u.loc || "";
                 document.getElementById('userBio').value = u.bio || "";
             });
 
             rdb.ref('posts').on('value', s => {
-                const grid = document.getElementById('marketGrid');
-                grid.innerHTML = "";
+                const grid = document.getElementById('marketGrid'); grid.innerHTML = "";
                 Object.entries(s.val() || {}).forEach(([id, p]) => {
-                    const img = p.img || 'https://via.placeholder.com/600x800/020617/00f2ff?text=NEXTDROP';
-                    grid.innerHTML += `
-                        <div class="card-snap overflow-hidden">
-                            <img src="${img}" class="w-full h-80 object-cover">
-                            <div class="p-8">
-                                <h3 class="text-2xl font-black italic uppercase mb-1">${p.title}</h3>
-                                <p class="text-[10px] font-bold opacity-30 mb-8 uppercase tracking-widest">${p.desc}</p>
-                                <button onclick="order('${id}', '${p.title}')" class="w-full btn-neon py-5 uppercase text-xs">Acquire</button>
-                            </div>
-                        </div>`;
+                    grid.innerHTML += `<div class="item-card overflow-hidden">
+                        <img src="${p.img}" class="w-full h-80 object-cover">
+                        <div class="p-8">
+                            <h3 class="text-xl font-bold">${p.title}</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-6">${p.desc}</p>
+                            <button onclick="addToCart('${id}', '${p.title}', '${p.img}')" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold uppercase text-xs">Add To Cart</button>
+                        </div>
+                    </div>`;
+                });
+            });
+
+            rdb.ref('orders').orderByChild('email').equalTo(session.email).on('value', s => {
+                const list = document.getElementById('trackerList'); list.innerHTML = "";
+                Object.entries(s.val() || {}).forEach(([id, o]) => {
+                    const st = o.status || 'pending';
+                    list.innerHTML += `<div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+                        <p class="text-[10px] font-bold text-blue-600 mb-4 uppercase">ORDER: ${id.substring(1,8)}</p>
+                        <div class="step active"><div class="step-dot"></div><p class="text-xs font-bold">Confirmed</p></div>
+                        <div class="step ${['shipped','delivered'].includes(st)?'active':''}"><div class="step-dot"></div><p class="text-xs font-bold">In Transit</p></div>
+                        <div class="step ${st==='delivered'?'active':''}" style="border:0; margin:0"><div class="step-dot"></div><p class="text-xs font-bold">Dropped</p></div>
+                    </div>`;
                 });
             });
 
             rdb.ref('chats/'+session.email).on('value', s => {
                 const d = document.getElementById('chatDisplay');
                 d.innerHTML = Object.values(s.val() || {}).map(m => `
-                    <div class="p-4 text-xs rounded-2xl max-w-[85%] ${m.sender === 'admin' ? 'bg-slate-800 self-start' : 'bg-cyan-500 text-black self-end font-black'}">${m.text}</div>
+                    <div class="p-4 text-sm rounded-2xl max-w-[85%] ${m.sender === 'admin' ? 'bg-white shadow-sm text-slate-800 self-start' : 'bg-blue-600 text-white self-end'}">${m.text}</div>
                 `).join('');
                 d.scrollTop = d.scrollHeight;
             });
         }
 
-        function saveProfile() {
-            rdb.ref('users/'+session.email).update({
-                loc: document.getElementById('userLoc').value,
-                bio: document.getElementById('userBio').value
-            }).then(() => alert("Identity Synced"));
+        async function uploadImage(input, mode) {
+            const file = input.files[0]; if(!file) return;
+            const fd = new FormData(); fd.append('image', file);
+            const res = await fetch('https://api.imgbb.com/1/upload?key=67f6b0f15c7e3995f560c5a242f36d4f', { method: 'POST', body: fd });
+            const data = await res.json();
+            if(data.success && mode === 'pfp') {
+                rdb.ref('users/'+session.email).update({ pfp: data.data.url });
+            }
         }
 
-        function adminPost() {
-            const t = document.getElementById('postTitle').value;
-            const d = document.getElementById('postDesc').value;
-            if(!t) return alert("Title Missing");
-            rdb.ref('posts').push({ title: t, desc: d, img: tempImg }).then(() => {
-                alert("Published!"); tempImg = ""; location.reload();
+        function addToCart(id, title, img) {
+            cart.push({id, title, img});
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = document.getElementById('cartCount');
+            count.innerText = cart.length; count.classList.toggle('hidden', cart.length === 0);
+            const list = document.getElementById('cartList');
+            list.innerHTML = cart.map((item, i) => `
+                <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl">
+                    <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
+                    <span class="flex-1 font-bold text-sm">${item.title}</span>
+                    <button onclick="cart.splice(${i},1); updateCartUI();" class="text-red-400 bg-transparent border-none">✕</button>
+                </div>`).join('');
+        }
+
+        function checkout() {
+            if(cart.length === 0) return;
+            rdb.ref('orders').push({ user: session.name, email: session.email, items: cart, status: 'pending' }).then(() => {
+                alert("Order Placed!"); cart = []; updateCartUI(); toggleCart(); showPage('orders');
             });
-        }
-
-        function loadAdmin() {
-            rdb.ref('users').on('value', s => {
-                const list = document.getElementById('admUserList'); list.innerHTML = "";
-                Object.entries(s.val() || {}).forEach(([k, u]) => {
-                    list.innerHTML += `<div class="p-4 glass rounded-2xl flex justify-between items-center">
-                        <p class="text-xs font-bold uppercase">${u.name} <span class="text-cyan-400">(${u.pass})</span></p>
-                        <button onclick="rdb.ref('users/${k}').remove()" class="text-red-500/50"><i class="fa-solid fa-trash"></i></button>
-                    </div>`;
-                });
-            });
-        }
-
-        function handleAuth() {
-            const e = document.getElementById('authEmail').value.toLowerCase().replace(/\./g, ',');
-            const p = document.getElementById('authPass').value;
-            rdb.ref('users/'+e).once('value', s => {
-                const u = s.val();
-                if(u && u.pass === p) { localStorage.setItem('user_persistent', JSON.stringify(u)); location.reload(); }
-                else alert("Unauthorized Access");
-            });
-        }
-
-        function sendMsg() {
-            const i = document.getElementById('chatInput'); if(!i.value) return;
-            rdb.ref('chats/'+session.email).push({ sender: 'user', text: i.value }); i.value = "";
         }
 
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
             document.getElementById(id).classList.add('active');
-            if(document.getElementById('nav-'+id)) document.getElementById('nav-'+id).classList.add('nav-active');
+            document.getElementById('nav-'+id).classList.add('nav-active');
         }
 
+        function sendMsg() {
+            const i = document.getElementById('chatInput');
+            if(i.value) { rdb.ref('chats/'+session.email).push({ sender: 'user', text: i.value }); i.value = ""; }
+        }
+
+        function saveProfile() {
+            rdb.ref('users/'+session.email).update({ 
+                loc: document.getElementById('userLoc').value, 
+                bio: document.getElementById('userBio').value 
+            }).then(() => alert("Saved"));
+        }
+
+        function toggleCart() { document.getElementById('cartDrawer').classList.toggle('hidden'); }
         function toggleChat() { document.getElementById('chatBox').classList.toggle('hidden'); }
         function logout() { localStorage.clear(); location.reload(); }
         boot();
